@@ -6,6 +6,7 @@
     <title>Beauty Booking</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Khula:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #000000;
@@ -407,6 +408,9 @@
     </div>
 
     <script>
+        const supabaseUrl = 'https://bxzwfidujuejmrbqjmgo.supabase.co/rest/v1/';
+        const supabaseKey = 'sb_publishable_eQsfW9mYbM1i3Vhwr7h8ig_jM29E24C';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         const icons = {
             menu: `<svg class="nav-icon" viewBox="0 0 31 38" fill="none"><path d="M24.54 6.458H6.458C5.744 6.458 5.166 7.036 5.166 7.75V11.625C5.166 12.338 5.744 12.916 6.458 12.916H24.54C25.255 12.916 25.833 12.338 25.833 11.625V7.75C25.833 7.036 25.255 6.458 24.54 6.458Z" stroke="currentColor"/><path d="M24.54 18.083H6.458C5.744 18.083 5.166 18.661 5.166 19.375V23.25C5.166 23.963 5.744 24.541 6.458 24.541H24.54C25.255 24.541 25.833 23.963 25.833 23.25V19.375C25.833 18.661 25.255 18.083 24.54 18.083Z" stroke="currentColor"/></svg>`,
             search: `<svg class="nav-icon" viewBox="0 0 33 38" fill="none"><path d="M26.98 26.872L18.63 18.522C17.964 19.09 17.197 19.53 16.33 19.841C15.464 20.152 14.592 20.308 13.717 20.308C11.585 20.308 9.779 19.567 8.298 18.086C6.817 16.604 6.077 14.798 6.077 12.666C6.077 10.535 6.817 8.728 8.298 7.248C9.779 5.767 11.585 5.026 13.717 5.025C15.848 5.024 17.655 5.765 19.137 7.248C20.619 8.73 21.359 10.536 21.358 12.666C21.358 13.592 21.194 14.489 20.866 15.356C20.538 16.222 20.107 16.964 19.573 17.58L27.922 25.928L26.98 26.872ZM13.718 18.973C15.487 18.973 16.98 18.364 18.198 17.146C19.416 15.928 20.025 14.435 20.025 12.665C20.025 10.895 19.416 9.402 18.198 8.185C16.98 6.968 15.487 6.359 13.718 6.358C11.949 6.357 10.456 6.966 9.237 8.185C8.018 9.404 7.409 10.897 7.41 12.665C7.411 14.433 8.02 15.926 9.237 17.145C10.454 18.364 11.947 18.972 13.717 18.972" fill="currentColor"/></svg>`,
@@ -570,6 +574,25 @@
             if (cityDropdown && !event.target.closest('.input-box')) cityDropdown.classList.remove('active');
             if (serviceDropdown && !event.target.closest('.input-box')) serviceDropdown.classList.remove('active');
         });
+
+        async function loadServicesFromDB() {
+        // Делаем запрос к таблице services
+        const { data, error } = await supabase.from('services').select('*');
+    
+        if (error) {
+            console.error("Ошибка базы:", error);
+            return;
+        }
+    
+        // Пока просто выводим результат в консоль
+        console.log("Ура! Услуги из базы:", data);
+    
+        // Скоро здесь будет код, который удаляет старые HTML-теги 
+        // и рисует новые карточки на основе data
+    }
+
+    // Запускаем загрузку при открытии приложения
+    loadServicesFromDB();
 
         renderNav();
         initCalendar();
