@@ -46,7 +46,7 @@ async def cmd_start(message: Message):
 # --- ОТКРЫТИЕ MINI APP ---
 @dp.message(Command("app"))
 async def cmd_app(message: Message):
-    web_app_url = "https://6aa6c51ef6f8260ce73f22bf--grand-shortbread-3b37a1.netlify.app/"
+    web_app_url = "https://beauty-aggregator-indol.vercel.app"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📱 Открыть приложение", web_app=WebAppInfo(url=web_app_url))]
     ])
