@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Beauty Booking</title>
+    <title>BB</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Khula:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -115,6 +115,74 @@
         .profile-name { font-size: 27px;}
         .profile-actions { display: flex; gap: 10px; margin-bottom: 30px;}
         .profile-action-btn { flex: 1; background: var(--primary-btn); border-radius: 13px; padding: 20px 10px; text-align: center; font-size: 19px; cursor: pointer;}
+    
+        /* ===== BB visual fixes ===== */
+        .app-title { margin-top: -8px; }
+        .btn, button, .profile-action-btn, .tag, .tab-full, .input-box, .nav-item {
+            -webkit-tap-highlight-color: transparent;
+            transition: transform .12s ease, opacity .12s ease, background-color .15s ease;
+        }
+        .btn:active, button:active, .profile-action-btn:active, .tag:active, .tab-full:active, .input-box:active, .nav-item:active {
+            transform: translateY(2px) scale(.985);
+        }
+        #bottom-navigation .nav-item:nth-child(2) .nav-icon { height: 25px; }
+        .profile-header { margin-bottom: 24px; }
+        .profile-header .page-title { font-size: 32px !important; }
+        .profile-avatar { overflow: hidden; background: #D9D9D9; }
+        .profile-avatar img, .profile-avatar[data-avatar] { object-fit: cover; }
+        .profile-avatar.has-image { background-size: cover; background-position: center; color: transparent; }
+        .profile-actions { max-width: 360px; margin-left: auto; margin-right: auto; }
+        .profile-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 84px;
+            padding: 12px 8px;
+        }
+        .profile-action-btn svg { flex: 0 0 auto; }
+        .profile-name { margin-top: 2px; }
+        .master-avatar { cursor: pointer; }
+        .slot-address, .slot-description {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            font-size: 20px;
+        }
+        .slot-address input, .slot-description textarea {
+            flex: 1;
+            min-width: 0;
+            background: var(--card-bg);
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 7px;
+            padding: 8px 10px;
+            font: inherit;
+            font-size: 13px;
+        }
+        .slot-description { align-items: flex-start; }
+        .slot-description textarea { min-height: 64px; resize: vertical; }
+        .dynamic-empty {
+            color: var(--text-hint);
+            text-align: center;
+            padding: 35px 10px;
+            font-size: 17px;
+        }
+        .dynamic-service-card { margin-left: 0; margin-right: 0; }
+        .records-list { padding: 0 20px; }
+        .record-card { position: relative; overflow: hidden; }
+        .record-card .service-header { padding-right: 0; }
+        .record-card .service-time { white-space: nowrap; margin-left: 8px; }
+        .record-card .record-cancel { position: absolute; right: 18px; top: 55px; }
+        .record-card .service-status { padding-right: 90px; }
+        .master-application-card { display: none; }
+        @media (max-width: 370px) {
+            .profile-actions { gap: 8px; }
+            .profile-action-btn { font-size: 17px; }
+        }
+
     </style>
 </head>
 <body>
@@ -143,36 +211,24 @@
     <!-- ==================== ЭКРАНЫ МОДЕЛИ ==================== -->
     <div id="screen-model-menu" class="screen active">
         <div class="header">
-            <div class="avatar">аватар</div>
-            <div class="bell-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+            <img class="avatar" data-avatar src="" alt="Аватар">
+            
         </div>
-        <div class="app-title">Beauty Booking</div>
+        <div class="app-title">BB</div>
         <div class="page-title">Выберите услугу</div>
 
-        <div class="service-card">
-            <div class="service-header">
-                <div class="service-left"><div class="service-icon">картинка<br>услуги</div><div class="service-title">Название услуги</div></div>
-            </div>
-            <button class="btn btn-primary" style="width: 150px; float: right; margin-top: -10px;" onclick="navigate('screen-model-search')">Выбрать</button>
-            <div style="clear: both;"></div>
-        </div>
+        <div id="model-menu-services"></div>
     </div>
 
     <div id="screen-model-search" class="screen">
         <div class="header">
-            <div class="avatar">аватар</div>
-            <div class="bell-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+            <img class="avatar" data-avatar src="" alt="Аватар">
+            
         </div>
-        <div class="app-title">Beauty Booking</div>
+        <div class="app-title">BB</div>
         
-        <!-- Виды услуг -->
-        <div class="tags-container">
-            <div class="tag active" onclick="toggleTag(this)">Вид услуги 1</div>
-            <div class="tag" onclick="toggleTag(this)">Вид услуги 2</div>
-            <div class="tag" onclick="toggleTag(this)">Вид услуги 3</div>
-            <div class="tag" onclick="toggleTag(this)">Вид услуги 4</div>
-            <div class="tag" onclick="toggleTag(this)">Вид услуги 5</div>
-        </div>
+        <!-- Виды услуг загружаются из базы -->
+        <div class="tags-container" id="service-tags"></div>
 
         <div class="input-box" style="border: none; padding: 0; font-size: 17px; width: auto; margin-bottom: 20px; gap: 10px;" onclick="toggleDropdown('city-dropdown')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
@@ -183,7 +239,8 @@
             </div>
         </div>
         
-        <div class="service-card">
+        <div id="model-search-results"></div>
+        <div class="service-card" data-static-search-card style="display:none;">
             <div class="service-header">
                 <div class="service-left"><div class="service-icon">картинка<br>услуги</div><div class="service-title" id="card-srv-name">Ламинирование ресниц</div></div>
                 <div class="service-time" id="card-srv-time">12.08 14:00</div>
@@ -236,7 +293,7 @@
         </div>
 
         <div style="padding: 0 20px;">
-            <div class="service-card" id="model-record-card">
+            <div class="service-card" id="model-record-card" style="display:none;">
                 <div class="service-header" style="margin-bottom: 5px;">
                     <div class="service-left"><div class="service-icon">картинка<br>услуги</div><div class="service-title">Название услуги</div></div>
                     <div class="service-time">дата и время</div>
@@ -251,8 +308,8 @@
     <div id="screen-model-profile" class="screen">
         <div class="page-title" style="font-size: 37px;">Профиль</div>
         <div class="profile-header">
-            <div class="profile-avatar">аватар</div>
-            <div class="profile-name">Имя</div>
+            <div class="profile-avatar" id="model-profile-avatar" data-avatar></div>
+            <div class="profile-name" id="model-profile-name">Никнейм</div>
         </div>
         <div class="profile-actions">
             <div class="profile-action-btn" onclick="navigate('screen-model-search')">
@@ -276,8 +333,8 @@
 
     <!-- ==================== ЭКРАНЫ МАСТЕРА ==================== -->
     <div id="screen-master-menu" class="screen">
-        <div class="header"><div class="avatar">аватар</div></div>
-        <div class="app-title">Beauty Booking</div>
+        <div class="header"><img class="avatar" data-avatar src="" alt="Аватар"></div>
+        <div class="app-title">BB</div>
         
         <button class="btn btn-primary" style="border-radius: 27px; height: 134px; margin-bottom: 30px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 10px;" onclick="navigate('screen-master-add')">
             <svg width="47" height="47" viewBox="0 0 30 30" fill="none"><path d="M15 28.125C7.762 28.125 1.875 22.237 1.875 15C1.875 7.762 7.762 1.875 15 1.875C22.237 1.875 28.125 7.762 28.125 15C28.125 22.237 22.237 28.125 15 28.125ZM15 3.75C8.793 3.75 3.75 8.793 3.75 15C3.75 21.206 8.793 26.25 15 26.25C21.206 26.25 26.25 21.206 26.25 15C26.25 8.793 21.206 3.75 15 3.75Z" fill="white"/><path d="M15 21.562C14.475 21.562 14.062 21.15 14.062 20.625V9.375C14.062 8.85 14.475 8.437 15 8.437C15.525 8.437 15.937 8.85 15.937 9.375V20.625C15.937 21.15 15.525 21.562 15 21.562Z" fill="white"/><path d="M20.625 15.937H9.375C8.85 15.937 8.437 15.525 8.437 15C8.437 14.475 8.85 14.062 9.375 14.062H20.625C21.15 14.062 21.562 14.475 21.562 15C21.562 15.525 21.15 15.937 20.625 15.937Z" fill="white"/></svg>
@@ -286,7 +343,7 @@
 
         <div class="page-title" style="font-size: 22px;">Заявки на рассмотрение</div>
         
-        <div class="service-card" id="master-application-card" style="border-radius: 7px; box-shadow: 0px 4px 14px rgba(0,0,0,0.07);">
+        <div class="service-card" id="master-application-card" style="display:none;" style="border-radius: 7px; box-shadow: 0px 4px 14px rgba(0,0,0,0.07);">
             <div class="service-header" style="margin-bottom: 5px;">
                 <div class="service-left"><div class="service-icon">картинка<br>услуги</div><div class="service-title">Название услуги</div></div>
                 <div class="service-time">дата и время</div>
@@ -298,7 +355,7 @@
             </div>
         </div>
 
-        <div class="empty-state" id="master-empty-state">
+        <div class="empty-state" id="master-empty-state" style="display:flex;">
             На данный момент<br>нет активных заявок
         </div>
     </div>
@@ -312,7 +369,8 @@
             </div>
         </div>
         <div style="padding: 0 20px;">
-            <div class="service-card">
+            <div id="master-records-list"></div>
+            <div class="service-card" data-static-master-record style="display:none;">
                 <div class="service-header" style="margin-bottom: 5px;">
                     <div class="service-left"><div class="service-icon">картинка<br>услуги</div><div class="service-title">Название услуги</div></div>
                     <div class="service-time">дата и время</div>
@@ -340,7 +398,10 @@
             </div>
         </div>
 
-        <div style="margin-bottom: 20px; font-size: 20px; display:flex; gap:10px; align-items:center;">Адрес <span style="font-size: 11px; color: var(--text-main);">‘автоматически из профиля’</span></div>
+        <label class="slot-address">
+            <span>Адрес</span>
+            <input id="slot-address-input" type="text" placeholder="Введите адрес">
+        </label>
         
         <div style="margin-bottom: 5px; font-size: 20px; display:flex; align-items:center; gap: 10px;">
             Фото работ
@@ -350,9 +411,10 @@
         </div>
         <div style="font-size: 7px; color:#FFF; margin-bottom: 20px; line-height: 11px;">По желанию можете указать свои работы или то, что<br>планируете сделать</div>
 
-        <div style="border: 0.5px solid #FFF; border-radius: 7px; padding: 5px 10px; background: var(--card-bg); font-size: 10px; display:flex; gap: 30px; margin-bottom: 20px;">
-            <span>Описание:</span><span>‘необязательно’</span>
-        </div>
+        <label class="slot-description">
+            <span>Описание:</span>
+            <textarea id="slot-description-input" placeholder="Описание слота"></textarea>
+        </label>
 
         <div class="page-title" style="font-size: 20px;">Укажите дату и время</div>
         <div class="calendar-box">
@@ -366,8 +428,9 @@
     <div id="screen-master-profile" class="screen">
         <div class="page-title" style="font-size: 37px;">Профиль</div>
         <div class="profile-header">
-            <div class="profile-avatar" style="background: #1C1C1D; color: #FFF;">аватар</div>
-            <div class="profile-name">Имя</div>
+            <div class="profile-avatar master-avatar" id="master-profile-avatar" data-avatar title="Нажмите, чтобы изменить фото"></div>
+            <input type="file" id="master-avatar-upload" accept="image/*" hidden>
+            <div class="profile-name" id="master-profile-name">Никнейм</div>
             <div class="profile-role">Мастер</div>
         </div>
         <div class="profile-actions">
@@ -597,6 +660,213 @@
         renderNav();
         initCalendar();
         if (window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.expand();
+
+        /* ===== BB data + Telegram profile logic ===== */
+        const tgUser = (window.Telegram && window.Telegram.WebApp)
+            ? window.Telegram.WebApp.initDataUnsafe?.user
+            : null;
+
+        function getStoredName() {
+            return localStorage.getItem('bb_nickname') || tgUser?.username || tgUser?.first_name || 'Пользователь';
+        }
+
+        function applyTelegramProfile() {
+            const name = getStoredName();
+            document.querySelectorAll('#model-profile-name, #master-profile-name').forEach(el => el.textContent = name);
+
+            const photo = tgUser?.photo_url || '';
+            document.querySelectorAll('[data-avatar]').forEach(el => {
+                if (el.id === 'master-profile-avatar') return;
+                if (photo) {
+                    el.style.backgroundImage = 'url("' + photo + '")';
+                    el.classList.add('has-image');
+                    if (el.tagName === 'IMG') el.src = photo;
+                } else {
+                    el.textContent = 'аватар';
+                }
+            });
+
+            const customMaster = localStorage.getItem('bb_master_avatar');
+            const masterAvatar = document.getElementById('master-profile-avatar');
+            if (masterAvatar) {
+                const url = customMaster || photo;
+                if (url) {
+                    masterAvatar.style.backgroundImage = 'url("' + url + '")';
+                    masterAvatar.classList.add('has-image');
+                } else {
+                    masterAvatar.textContent = 'аватар';
+                }
+            }
+
+            const address = localStorage.getItem('bb_master_address') || '';
+            const addressInput = document.getElementById('slot-address-input');
+            if (addressInput && address) addressInput.value = address;
+        }
+
+        function setupMasterAvatarUpload() {
+            const avatar = document.getElementById('master-profile-avatar');
+            const input = document.getElementById('master-avatar-upload');
+            if (!avatar || !input) return;
+            avatar.addEventListener('click', () => input.click());
+            input.addEventListener('change', () => {
+                const file = input.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    localStorage.setItem('bb_master_avatar', e.target.result);
+                    applyTelegramProfile();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function setupEditableNickname() {
+            document.querySelectorAll('#model-profile-name, #master-profile-name').forEach(el => {
+                el.style.cursor = 'pointer';
+                el.title = 'Нажмите, чтобы изменить никнейм';
+                el.addEventListener('click', () => {
+                    const next = prompt('Введите никнейм', getStoredName());
+                    if (next && next.trim()) {
+                        localStorage.setItem('bb_nickname', next.trim().replace(/^@/, ''));
+                        applyTelegramProfile();
+                    }
+                });
+            });
+        }
+
+        async function renderRealServices() {
+            const { data: services, error } = await supabaseClient.from('services').select('*');
+            if (error) {
+                console.error('Ошибка загрузки услуг:', error);
+                return;
+            }
+
+            const tags = document.getElementById('service-tags');
+            if (tags) {
+                tags.innerHTML = '';
+                services.forEach(service => {
+                    const tag = document.createElement('div');
+                    tag.className = 'tag active';
+                    tag.textContent = service.name;
+                    tag.onclick = () => {
+                        document.querySelectorAll('.tag').forEach(x => x.classList.remove('active'));
+                        tag.classList.add('active');
+                        renderSearchResults(service.service_id);
+                    };
+                    tags.appendChild(tag);
+                });
+            }
+
+            const menu = document.getElementById('model-menu-services');
+            if (menu) {
+                menu.innerHTML = '';
+                if (!services.length) {
+                    menu.innerHTML = '<div class="dynamic-empty">Сейчас нет доступных услуг</div>';
+                } else {
+                    services.slice(0, 3).forEach(service => {
+                        const card = document.createElement('div');
+                        card.className = 'service-card dynamic-service-card';
+                        card.innerHTML = '<div class="service-header"><div class="service-left"><div class="service-icon">услуга</div><div class="service-title"></div></div></div><button class="btn btn-primary" style="width:150px;float:right;margin-top:-10px;">Выбрать</button><div style="clear:both;"></div>';
+                        card.querySelector('.service-title').textContent = service.name;
+                        card.querySelector('button').onclick = () => {
+                            navigate('screen-model-search');
+                            renderSearchResults(service.service_id);
+                        };
+                        menu.appendChild(card);
+                    });
+                }
+            }
+
+            if (services.length) await renderSearchResults(services[0].service_id);
+        }
+
+        async function renderSearchResults(serviceId) {
+            const container = document.getElementById('model-search-results');
+            if (!container) return;
+
+            let query = supabaseClient.from('slots').select('*').eq('service_id', serviceId).eq('status', 'Свободен');
+            const city = document.getElementById('selected-city')?.textContent;
+            if (city && city !== 'Город') {
+                query = query.eq('city', city);
+            }
+
+            const { data: slots, error } = await query;
+            if (error) {
+                console.error('Ошибка загрузки слотов:', error);
+                container.innerHTML = '<div class="dynamic-empty">Не удалось загрузить свободные слоты</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            if (!slots.length) {
+                container.innerHTML = '<div class="dynamic-empty">Нет свободных слотов</div>';
+                return;
+            }
+
+            slots.forEach(slot => {
+                const card = document.createElement('div');
+                card.className = 'service-card dynamic-service-card';
+                const dt = slot.date_time ? new Date(slot.date_time) : null;
+                const time = dt && !Number.isNaN(dt.getTime())
+                    ? dt.toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})
+                    : 'дата и время';
+                card.innerHTML = '<div class="service-header"><div class="service-left"><div class="service-icon">услуга</div><div class="service-title"></div></div><div class="service-time"></div></div><button class="btn btn-outline btn-small">Подробнее</button><div class="service-details"><div class="details-text address"></div><div class="details-text description"></div></div><button class="btn btn-primary">Записаться</button>';
+                card.querySelector('.service-title').textContent = slot.service_name || 'Услуга';
+                card.querySelector('.service-time').textContent = time;
+                card.querySelector('.address').textContent = slot.address || slot.city || '';
+                card.querySelector('.description').textContent = slot.description || '';
+                card.querySelector('.btn-outline').onclick = function(){ toggleDetails(this); };
+                card.querySelector('.btn-primary').onclick = () => bookRealSlot(slot);
+                container.appendChild(card);
+            });
+        }
+
+        async function bookRealSlot(slot) {
+            const userId = tgUser?.id;
+            if (!userId) {
+                alert('Откройте приложение через Telegram.');
+                return;
+            }
+            const { data, error } = await supabaseClient.from('bookings').insert({
+                user_id: userId,
+                slot_id: slot.slot_id,
+                status: 'Ожидает подтверждения мастера'
+            }).select().single();
+            if (error) {
+                console.error(error);
+                alert('Не удалось отправить заявку.');
+                return;
+            }
+            await supabaseClient.from('slots').update({status:'Ожидает подтверждения'}).eq('slot_id', slot.slot_id);
+            navigate('screen-model-success');
+        }
+
+        function setupCityFilter() {
+            const city = document.getElementById('selected-city');
+            if (!city) return;
+            city.parentElement.addEventListener('click', () => {
+                setTimeout(() => {
+                    const selected = city.textContent;
+                    if (selected && selected !== 'Город') {
+                        const active = document.querySelector('.tag.active');
+                        if (active) {
+                            const services = document.querySelectorAll('#service-tags .tag');
+                            const index = Array.from(services).indexOf(active);
+                            if (index >= 0) active.click();
+                        }
+                    }
+                }, 0);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTelegramProfile();
+            setupMasterAvatarUpload();
+            setupEditableNickname();
+            setupCityFilter();
+            renderRealServices();
+        });
+
     </script>
 </body>
 </html>
