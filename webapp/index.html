@@ -183,6 +183,16 @@
             .profile-action-btn { font-size: 17px; }
         }
 
+    
+        .profile-address-field {
+            display:flex; flex-direction:column; gap:7px; margin: 0 auto 22px;
+            max-width: 340px; font-size: 17px;
+        }
+        .profile-address-field input, .slot-city select {
+            width:100%; background:var(--card-bg); color:#fff; border:1px solid #555;
+            border-radius:7px; padding:9px 10px; font:inherit; font-size:14px;
+        }
+        .slot-city { flex-direction:column; align-items:stretch; gap:7px; }
     </style>
 </head>
 <body>
@@ -398,6 +408,13 @@
             </div>
         </div>
 
+        <label class="slot-address slot-city">
+            <span>Город</span>
+            <select id="slot-city-input">
+                <option value="Москва">Москва</option>
+                <option value="Санкт-Петербург">Санкт-Петербург</option>
+            </select>
+        </label>
         <label class="slot-address">
             <span>Адрес</span>
             <input id="slot-address-input" type="text" placeholder="Введите адрес">
@@ -422,7 +439,7 @@
             <div class="calendar-grid" id="calendar-grid"></div>
         </div>
 
-        <button class="btn btn-primary" style="border-radius: 27px; font-size: 22px; padding: 15px;" onclick="navigate('screen-master-success')">Опубликовать слот</button>
+        <button class="btn btn-primary" style="border-radius: 27px; font-size: 22px; padding: 15px;" onclick="createRealSlot()">Опубликовать слот</button>
     </div>
 
     <div id="screen-master-profile" class="screen">
@@ -865,6 +882,133 @@
             setupEditableNickname();
             setupCityFilter();
             renderRealServices();
+        });
+
+        async function createRealSlot() {
+            const userId = tgUser?.id;
+            if (!userId) {
+                alert('Откройте приложение через Telegram.');
+                return;
+            }
+
+            const serviceName = document.getElementById('selected-service')?.textContent?.trim();
+            const service = (await supabaseClient.from('services').select('service_id').eq('name', serviceName).limit(1).maybeSingle()).data;
+            if (!service?.service_id) {
+                alert('Выберите услугу.');
+                return;
+            }
+
+            const city = document.getElementById('slot-city-input')?.value || '';
+            const address = document.getElementById('slot-address-input')?.value?.trim() || '';
+            const description = document.getElementById('slot-description-input')?.value?.trim() || '';
+            const selectedDay = document.querySelector('.calendar-day.selected')?.textContent;
+            const month = 7; // August in the current visual calendar
+            const year = 2026;
+            if (!selectedDay) {
+                alert('Выберите дату в календаре.');
+                return;
+            }
+
+            const dt = new Date(year, month, Number(selectedDay), 12, 0, 0);
+            const { error } = await supabaseClient.from('slots').insert({
+                master_id: userId,
+                service_id: service.service_id,
+                date_time: dt.toISOString(),
+                status: 'Свободен',
+                city,
+                address,
+                description
+            });
+
+            if (error) {
+                console.error(error);
+                alert('Не удалось создать слот. Проверьте, что в таблице slots есть поля city, address и description.');
+                return;
+            }
+
+            if (address) localStorage.setItem('bb_master_address', address);
+            navigate('screen-master-success');
+        }
+
+        function setupProfileAddress() {
+            const profileInput = document.getElementById('master-profile-address');
+            const slotInput = document.getElementById('slot-address-input');
+            const saved = localStorage.getItem('bb_master_address') || '';
+            if (profileInput) {
+                profileInput.value = saved;
+                profileInput.addEventListener('change', () => {
+                    localStorage.setItem('bb_master_address', profileInput.value.trim());
+                    if (slotInput && !slotInput.value) slotInput.value = profileInput.value.trim();
+                });
+            }
+            if (slotInput && !slotInput.value && saved) slotInput.value = saved;
+        }
+
+        async function renderMasterApplications() {
+            const card=document.getElementById('master-application-card');
+            const empty=document.getElementById('master-empty-state');
+            if (!card || !empty || !tgUser?.id) return;
+
+            const {data: masters}=await supabaseClient.from('masters').select('master_id').eq('master_id',tgUser.id).limit(1);
+            if (!masters?.length) return;
+
+            const {data: bookings,error}=await supabaseClient.from('bookings').select('booking_id,slot_id,user_id,status').eq('status','Ожидает подтверждения мастера');
+            if (error) { console.error(error); return; }
+
+            const rows=[];
+            for (const b of bookings || []) {
+                const {data:s}=await supabaseClient.from('slots').select('service_id,date_time,master_id').eq('slot_id',b.slot_id).maybeSingle();
+                if (s?.master_id===tgUser.id) rows.push({...b,slot:s});
+            }
+
+            if (!rows.length) {
+                card.style.display='none';
+                empty.style.display='flex';
+                return;
+            }
+
+            const b=rows[0];
+            const {data:service}=await supabaseClient.from('services').select('name').eq('service_id',b.slot.service_id).maybeSingle();
+            card.style.display='block';
+            empty.style.display='none';
+            card.querySelector('.service-title').textContent=service?.name || 'Услуга';
+            const dt=new Date(b.slot.date_time);
+            card.querySelector('.service-time').textContent=dt.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+            card.dataset.bookingId=b.booking_id;
+        }
+
+        async function renderModelRecords() {
+            const screen=document.getElementById('screen-model-records');
+            if (!screen || !tgUser?.id) return;
+            const old=screen.querySelector('.dynamic-records-list');
+            if (old) old.remove();
+            const wrap=document.createElement('div');
+            wrap.className='records-list dynamic-records-list';
+            screen.appendChild(wrap);
+
+            const {data:bookings,error}=await supabaseClient.from('bookings').select('booking_id,slot_id,status').eq('user_id',tgUser.id);
+            if (error) { console.error(error); return; }
+            if (!bookings?.length) { wrap.innerHTML='<div class="dynamic-empty">У вас пока нет записей</div>'; return; }
+
+            for (const b of bookings) {
+                const {data:s}=await supabaseClient.from('slots').select('service_id,date_time').eq('slot_id',b.slot_id).maybeSingle();
+                if (!s) continue;
+                const {data:service}=await supabaseClient.from('services').select('name').eq('service_id',s.service_id).maybeSingle();
+                const dt=new Date(s.date_time);
+                const card=document.createElement('div');
+                card.className='service-card record-card';
+                card.innerHTML='<div class="service-header"><div class="service-left"><div class="service-icon">услуга</div><div class="service-title"></div></div><div class="service-time"></div></div><div class="service-status"></div><button class="btn btn-outline btn-small record-cancel">Отменить</button><button class="btn btn-primary">Связаться с мастером</button>';
+                card.querySelector('.service-title').textContent=service?.name || 'Услуга';
+                card.querySelector('.service-time').textContent=dt.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+                card.querySelector('.service-status').textContent='статус: '+b.status;
+                wrap.appendChild(card);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupProfileAddress();
+            renderMasterApplications();
+            renderModelRecords();
         });
 
     </script>
