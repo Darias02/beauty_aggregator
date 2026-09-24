@@ -5,7 +5,6 @@ from supabase import create_client, Client
 
 load_dotenv()
 
-# Инициализируем клиента базы данных
 supabase: Client = create_client(
     os.environ.get("SUPABASE_URL"),
     os.environ.get("SUPABASE_KEY")
@@ -28,24 +27,20 @@ def get_available_slots(service_id: int, user_id: int):
     return supabase.table("slots").select("*").eq("service_id", service_id).eq("status", "Свободен").execute().data
 
 def create_booking(user_id: int, slot_id: int):
-    # Проверяем статус слота
     slot_res = supabase.table("slots").select("service_id, master_id, status, date_time").eq("slot_id", slot_id).execute().data
     if not slot_res or slot_res[0]['status'] != 'Свободен':
         return None
     
     slot = slot_res[0]
     
-    # Создаем бронирование
     booking_res = supabase.table("bookings").insert({
         "user_id": user_id, 
         "slot_id": slot_id, 
         "status": "Ожидает подтверждения мастера"
     }).execute().data[0]
     
-    # Обновляем статус слота
     supabase.table("slots").update({"status": "Ожидает подтверждения"}).eq("slot_id", slot_id).execute()
     
-    # Достаем название услуги
     service_res = supabase.table("services").select("name").eq("service_id", slot['service_id']).execute().data[0]
     
     return {

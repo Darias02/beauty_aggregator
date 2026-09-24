@@ -24,15 +24,12 @@
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Базовые элементы */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .avatar { width: 49px; height: 49px; background: var(--card-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; overflow: hidden; background-size: cover; background-position: center;}
         
-        /* Элегантный логотип BB */
         .app-title { text-align: center; font-size: 38px; margin-top: -15px; margin-bottom: 25px; font-weight: 300; letter-spacing: 2px;}
         .page-title { font-size: 27px; margin-bottom: 20px; }
 
-        /* Глобальная анимация кнопок */
         .btn, button, .profile-action-btn, .tag, .tab-full, .input-box, .nav-item {
             transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
         }
@@ -41,7 +38,6 @@
             opacity: 0.9;
         }
 
-        /* 3D Карточки (выпуклый эффект) */
         .service-card, .records-top-panel, .calendar-box, .modal-box { 
             background: linear-gradient(145deg, #222223, #181819); 
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05); 
@@ -56,8 +52,6 @@
         .service-title { font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;}
         .service-time { font-size: 14px; color: var(--text-main); white-space: nowrap; margin-top: 4px;}
         .service-status { font-size: 16px; margin-bottom: 15px; padding-right: 90px;}
-
-        /* Скелетоны (Призрачные карточки) */
         .service-card.skeleton-card {
             background: rgba(255, 255, 255, 0.02);
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
@@ -74,17 +68,14 @@
         }
         @keyframes skeleton-loading { 100% { left: 200%; } }
 
-        /* Раскрывающееся описание */
         .service-details { display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;}
         .service-details.expanded { display: block; animation: fadeIn 0.3s ease; }
         .details-text { font-size: 15px; margin-bottom: 10px; line-height: 1.4; color: #FFF;}
 
-        /* Фильтры услуг */
         .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
         .tag { background: var(--card-bg); padding: 5px 15px; border-radius: 10px; font-size: 15px; cursor: pointer; user-select: none; }
         .tag.active { background: var(--primary-btn); color: var(--text-main); box-shadow: 0 4px 10px rgba(51, 144, 236, 0.3);}
 
-        /* Кнопки */
         .btn { width: 100%; border-radius: 10px; padding: 10px; font-size: 20px; border: none; cursor: pointer; text-align: center; color: #FFF; letter-spacing: 0.07em;}
         .btn-primary { background: var(--primary-btn); box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);}
         .btn-outline { background: transparent; border: 1.5px solid var(--primary-btn); }
@@ -94,18 +85,15 @@
         .btn-approve { background: var(--primary-btn); flex: 1; border: 0.5px solid transparent; border-radius: 6px; padding: 10px; font-size: 12.5px; color: #FFFFFF; letter-spacing: 0.07em;}
         .btn-reject { background: var(--card-bg); flex: 1; border: 0.5px solid #FFF; border-radius: 6px; padding: 10px; font-size: 12.5px; color: #FFFFFF; letter-spacing: 0.07em;}
 
-        /* Шапка для "Мои записи" */
         .records-top-panel { padding: 30px 20px 0 20px; margin: 0 0 20px 0; height: auto; display: flex; flex-direction: column; justify-content: space-between; border-radius: 17px;}
         .records-title { font-size: 27px; text-align: center; color: #FFF; margin-bottom: 20px;}
         .tabs-container-full { display: flex; width: 100%; border-bottom: 1px solid #333;}
         .tab-full { flex: 1; text-align: center; padding: 12px 10px; font-size: 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;}
         .tab-full.active { border-bottom: 2px solid #FFFFFF; color: #FFF; font-weight: 600;}
 
-        /* Кнопка отмены в карточке записи */
         .record-card { position: relative; }
         .record-card .record-cancel { position: absolute; right: 18px; bottom: 65px; z-index: 10;}
 
-        /* Создание слота */
         .input-box { border: 1.5px solid var(--primary-btn); border-radius: 7px; padding: 8px 15px; font-size: 20px; display: inline-flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; position: relative; width: 196px;}
         .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; z-index: 10; margin-top: 5px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
         .dropdown-menu.active { display: block; animation: fadeIn 0.2s;}
@@ -118,7 +106,6 @@
         .slot-city { flex-direction: column; align-items: stretch; gap: 7px; }
         .slot-city select { width: 100%; background: var(--bg-color); color: #fff; border: 1px solid #444; border-radius: 7px; padding: 9px 10px; font: inherit; font-size: 14px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
 
-        /* Идеальный пропорциональный календарь (круглые даты) */
         .calendar-box { padding: 20px; display: flex; flex-direction: column;}
         .calendar-header { text-align: center; font-size: 20px; margin-bottom: 15px;}
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex-grow: 1;}
@@ -134,7 +121,6 @@
             box-shadow: 0 4px 12px rgba(51, 144, 236, 0.4);
         }
 
-        /* Модальные окна */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(5px);}
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box { padding: 25px 15px; width: 333px; text-align: center; transform: scale(0.9); transition: 0.3s;}
@@ -143,7 +129,6 @@
         .modal-buttons { display: flex; gap: 10px; }
         .modal-btn { flex: 1; background: transparent; border: 0.5px solid #FFF; border-radius: 6px; padding: 12px 5px; color: #FFF; font-size: 12.5px; cursor: pointer; letter-spacing: 0.07em;}
 
-        /* Нижнее меню (Стекло) */
         .bottom-nav { 
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
             width: 333px; height: 56px; border-radius: 28px; display: flex; z-index: 100;
@@ -165,7 +150,6 @@
         #bottom-navigation .nav-item:nth-child(2) .nav-icon { height: 26px; }
         .nav-text { font-family: 'Inter'; font-size: 10px; letter-spacing: 0.07em;}
         
-        /* Стили профиля */
         .profile-header { text-align: center; margin-bottom: 24px;}
         .profile-avatar { width: 149px; height: 149px; background: #D9D9D9; border-radius: 50%; margin: 20px auto; display:flex; align-items:center; justify-content:center; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 6px 15px rgba(0,0,0,0.5);}
         .profile-name { font-size: 27px; margin-top: 5px; cursor: pointer;}
@@ -179,7 +163,6 @@
 </head>
 <body>
 
-    <!-- МОДАЛЬНЫЕ ОКНА -->
     <div class="modal-overlay" id="modal-reject" onclick="closeModal('modal-reject')">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-title">Почему вы хотите отклонить заявку?</div>
@@ -200,7 +183,6 @@
         </div>
     </div>
 
-    <!-- ==================== ЭКРАНЫ МОДЕЛИ ==================== -->
     <div id="screen-model-menu" class="screen active">
         <div class="header">
             <div class="avatar" data-avatar></div>
@@ -209,7 +191,6 @@
         <div class="app-title">BB</div>
         <div class="page-title">Выберите услугу</div>
 
-        <!-- Динамическое меню услуг (максимум 7) -->
         <div id="model-menu-services"></div>
     </div>
 
@@ -234,7 +215,6 @@
         <div id="model-search-results"></div>
     </div>
 
-    <!-- Модель: Успех -->
     <div id="screen-model-success" class="screen" style="padding-top: 40px;">
         <div style="display:flex; justify-content:center; margin-bottom: 20px;">
             <svg width="109" height="109" viewBox="0 0 109 109" fill="none"><circle cx="54.5" cy="54.5" r="52.5" stroke="white" stroke-width="4"/><path d="M32 55L48 70L78 35" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -297,7 +277,6 @@
         </div>
     </div>
 
-    <!-- ==================== ЭКРАНЫ МАСТЕРА ==================== -->
     <div id="screen-master-menu" class="screen">
         <div class="header">
             <div class="avatar" data-avatar></div>
@@ -421,7 +400,6 @@
         </div>
     </div>
 
-    <!-- Мастер: Успех -->
     <div id="screen-master-success" class="screen" style="padding-top: 80px;">
         <div style="display:flex; justify-content:center; align-items:center; flex-direction:column;">
             <div class="check-card">
@@ -432,7 +410,6 @@
         </div>
     </div>
 
-    <!-- ДИНАМИЧЕСКОЕ НИЖНЕЕ МЕНЮ -->
     <div class="bottom-nav" id="bottom-navigation">
         <div class="nav-indicator" id="nav-indicator"></div>
     </div>
@@ -586,7 +563,6 @@
             if (serviceDropdown && !event.target.closest('.input-box')) serviceDropdown.classList.remove('active');
         });
 
-        /* ===== Логика данных и профиля (Telegram + Supabase) ===== */
         const tgUser = (window.Telegram && window.Telegram.WebApp)
             ? window.Telegram.WebApp.initDataUnsafe?.user
             : null;
@@ -649,7 +625,6 @@
         }
 
         async function renderRealServices() {
-            // Лимит на 7 последних добавленных услуг
             const { data: services, error } = await supabaseClient.from('services').select('*').limit(7);
             const menu = document.getElementById('model-menu-services');
             
@@ -658,7 +633,6 @@
                 return; 
             }
 
-            // Получаем все свободные слоты, чтобы проверить, какие услуги сейчас активны
             const { data: slots } = await supabaseClient.from('slots').select('service_id').eq('status', 'Свободен');
             const slotCounts = {};
             if (slots) slots.forEach(s => slotCounts[s.service_id] = (slotCounts[s.service_id] || 0) + 1);
@@ -684,10 +658,8 @@
                 services.forEach(service => {
                     const hasSlots = (slotCounts[service.service_id] || 0) > 0;
                     
-                    // Если слотов нет, карточка становится серой и полупрозрачной
                     const opacityStyle = hasSlots ? '' : 'opacity: 0.5; filter: grayscale(100%);';
                     
-                    // Логика добавления картинки из базы
                     const iconHtml = service.icon_url 
                         ? `<div class="service-icon" style="background-image: url('${service.icon_url}'); background-size: cover; background-position: center; border: none; color: transparent;"></div>` 
                         : `<div class="service-icon">услуга</div>`;

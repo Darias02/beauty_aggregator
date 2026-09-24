@@ -9,7 +9,6 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types.web_app_info import WebAppInfo
 from dotenv import load_dotenv
 
-# Импортируем все нужные функции из нашего модуля базы данных
 from database import (
     add_user, get_available_services, get_available_slots, 
     create_booking, confirm_booking_db, reject_booking_db, 
@@ -17,7 +16,6 @@ from database import (
 )
 import socket
 
-# Принудительно заставляем макбук использовать IPv4 для Telegram
 old_getaddrinfo = socket.getaddrinfo
 def new_getaddrinfo(*args, **kwargs):
     responses = old_getaddrinfo(*args, **kwargs)
@@ -29,7 +27,6 @@ TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- СТАРТ ---
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
     tg_id = message.from_user.id
@@ -43,7 +40,6 @@ async def cmd_start(message: Message):
         "Для запуска Mini App отправь /app"
     )
 
-# --- ОТКРЫТИЕ MINI APP ---
 @dp.message(Command("app"))
 async def cmd_app(message: Message):
     web_app_url = "https://beauty-aggregator-indol.vercel.app"
@@ -52,7 +48,6 @@ async def cmd_app(message: Message):
     ])
     await message.answer("Давай протестируем наш интерфейс!", reply_markup=keyboard)
 
-# --- ПРОСМОТР УСЛУГ (/book) ---
 @dp.message(Command("book"))
 async def show_available_services(message: Message):
     user_id = message.from_user.id
@@ -66,7 +61,6 @@ async def show_available_services(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
     await message.answer("Выберите услугу, на которую хотите записаться:", reply_markup=keyboard)
 
-# --- ВЫБОР ВРЕМЕНИ ДЛЯ УСЛУГИ ---
 @dp.callback_query(lambda c: c.data.startswith("service_"))
 async def process_service_selection(callback: CallbackQuery):
     service_id = int(callback.data.split("_")[1])
@@ -81,7 +75,6 @@ async def process_service_selection(callback: CallbackQuery):
 
     keyboard_buttons = []
     for slot in slots:
-        # Парсим строку времени из базы (ISO формат) в красивый вид
         dt = datetime.fromisoformat(slot['date_time'].replace('Z', '+00:00'))
         formatted_time = dt.strftime("%d.%m.%Y %H:%M")
         keyboard_buttons.append([InlineKeyboardButton(text=formatted_time, callback_data=f"slot_{slot['slot_id']}")])
@@ -90,7 +83,6 @@ async def process_service_selection(callback: CallbackQuery):
     await callback.message.edit_text("Выберите удобное время для записи:", reply_markup=keyboard)
     await callback.answer()
 
-# --- МОДЕЛЬ БРОНИРУЕТ СЛОТ ---
 @dp.callback_query(lambda c: c.data.startswith("slot_"))
 async def process_slot_booking(callback: CallbackQuery):
     slot_id = int(callback.data.split("_")[1])
@@ -177,7 +169,6 @@ async def process_reject_reason(callback: CallbackQuery):
         except Exception:
             pass
 
-# --- FSM СОСТОЯНИЯ МАСТЕРА ---
 class SlotCreate(StatesGroup):
     service_id = State()
     date_time = State()
@@ -253,7 +244,7 @@ async def cancel_slot(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.answer()
 
-# --- ЗАПУСК БОТА ---
+
 async def main():
     print("Бот успешно запущен и готов к работе! 🚀")
     await dp.start_polling(bot)
