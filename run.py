@@ -91,7 +91,7 @@ async def process_slot_booking(callback: CallbackQuery):
 
     booking_data = create_booking(user_id, slot_id)
     if not booking_data:
-        await callback.message.edit_text("К сожалению, этот слот уже занят или ожидает подтверждения! 😢")
+        await callback.message.edit_text("К сожалению, этот слот уже занят или ожидает подтверждения")
         await callback.answer()
         return
 
@@ -104,37 +104,35 @@ async def process_slot_booking(callback: CallbackQuery):
 
     master_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"confirm_{booking_data['booking_id']}"),
-            InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{booking_data['booking_id']}")
+            InlineKeyboardButton(text="Подтвердить", callback_data=f"confirm_{booking_data['booking_id']}"),
+            InlineKeyboardButton(text="Отклонить", callback_data=f"reject_{booking_data['booking_id']}")
         ]
     ])
 
     try:
         await bot.send_message(
             chat_id=booking_data['master_id'],
-            text=f"🔔 Новая заявка на бронирование!\n\n"
-                 f"👤 Модель: {full_name}\n"
-                 f"💅 Услуга: {booking_data['service_name']}\n"
-                 f"📅 Время: {formatted_time}\n\n"
+            text=f"Новая заявка на бронирование!\n\n"
+                 f"Модель: {full_name}\n"
+                 f"Услуга: {booking_data['service_name']}\n"
+                 f"Время: {formatted_time}\n\n"
                  f"Подтверждаете запись?",
             reply_markup=master_keyboard
         )
     except Exception as e:
         print(f"Не удалось отправить сообщение мастеру: {e}")
 
-# --- МАСТЕР ПОДТВЕРЖДАЕТ БРОНЬ ---
 @dp.callback_query(lambda c: c.data.startswith("confirm_"))
 async def confirm_booking(callback: CallbackQuery):
     booking_id = int(callback.data.split("_")[1])
     client_id = confirm_booking_db(booking_id)
 
-    await callback.message.edit_text("✅ Вы успешно подтвердили запись! Модели отправлено уведомление.")
+    await callback.message.edit_text("Вы успешно подтвердили запись! Модели отправлено уведомление.")
     await callback.answer()
 
     if client_id:
-        await bot.send_message(chat_id=client_id, text="✅ Ура! Мастер подтвердил вашу запись. Ждем вас на процедуру! ✨")
+        await bot.send_message(chat_id=client_id, text="Ура! Мастер подтвердил вашу запись. Ждем вас на процедуру! ✨")
 
-# --- МАСТЕР ОТКЛОНЯЕТ БРОНЬ ---
 @dp.callback_query(lambda c: c.data.startswith("reject_"))
 async def ask_reject_reason(callback: CallbackQuery):
     booking_id = int(callback.data.split("_")[1])
@@ -154,11 +152,11 @@ async def process_reject_reason(callback: CallbackQuery):
     client_id = reject_booking_db(booking_id, reason)
 
     if reason == "plans":
-        master_text = "❌ Запись отклонена (изменились планы). Слот закрыт."
-        model_text = "К сожалению, мастер отменил вашу запись, так как у него изменились планы. 😢"
+        master_text = "Запись отклонена (изменились планы). Слот закрыт."
+        model_text = "К сожалению, мастер отменил вашу запись, так как у него изменились планы."
     else:
-        master_text = "❌ Запись отклонена (модель не подходит). Слот снова свободен."
-        model_text = "К сожалению, мастер отклонил вашу заявку на бронирование. 😢"
+        master_text = "Запись отклонена (модель не подходит). Слот снова свободен."
+        model_text = "К сожалению, мастер отклонил вашу заявку на бронирование."
 
     await callback.message.edit_text(master_text)
     await callback.answer()
@@ -178,7 +176,7 @@ class SlotCreate(StatesGroup):
 async def cmd_add_slot(message: Message, state: FSMContext):
     master_id = message.from_user.id
     if not check_is_master(master_id):
-        await message.answer("Эта команда доступна только мастерам. 🛑")
+        await message.answer("Эта команда доступна только мастерам.")
         return
             
     services = get_all_services()
@@ -206,14 +204,14 @@ async def process_slot_datetime(message: Message, state: FSMContext):
     try:
         dt = datetime.strptime(message.text.strip(), "%d.%m.%Y %H:%M")
     except ValueError:
-        await message.answer("Неверный формат! 😢 Попробуйте еще раз в формате ДД.ММ.ГГГГ ЧЧ:ММ")
+        await message.answer("Неверный формат! Попробуйте еще раз в формате ДД.ММ.ГГГГ ЧЧ:ММ")
         return
         
     await state.update_data(date_time=dt.isoformat())
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Опубликовать", callback_data="publish_slot")],
-        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_slot")]
+        [InlineKeyboardButton(text="Опубликовать", callback_data="publish_slot")],
+        [InlineKeyboardButton(text="Отмена", callback_data="cancel_slot")]
     ])
     
     await message.answer(f"Вы указали время: {dt.strftime('%d.%m.%Y %H:%M')}.\nГотовы опубликовать?", reply_markup=keyboard)
@@ -229,12 +227,12 @@ async def publish_slot(callback: CallbackQuery, state: FSMContext):
     success = add_new_slot(master_id, service_id, dt_str)
         
     if not success:
-        await callback.message.edit_text("🛑 У вас уже есть слот на это время! Введите другие дату и время:")
+        await callback.message.edit_text("У вас уже есть слот на это время! Введите другие дату и время:")
         await state.set_state(SlotCreate.date_time)
         await callback.answer()
         return
         
-    await callback.message.edit_text("✅ Слот опубликован! Теперь клиенты смогут на него записаться.")
+    await callback.message.edit_text("Слот опубликован! Теперь клиенты смогут на него записаться.")
     await state.clear()
     await callback.answer()
 
@@ -246,7 +244,7 @@ async def cancel_slot(callback: CallbackQuery, state: FSMContext):
 
 
 async def main():
-    print("Бот успешно запущен и готов к работе! 🚀")
+    print("Бот успешно запущен и готов к работе!")
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
