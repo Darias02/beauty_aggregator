@@ -7,182 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Khula:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --bg-color: #000000;
-            --card-bg: #1C1C1D;
-            --primary-btn: #3390EC;
-            --text-main: #FFFFFF;
-            --text-hint: #98989E;
-            --border-color: #5C5C5C;
-        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Khula', 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 100px; }
-
-        .screen { display: none; animation: fadeIn 0.3s ease; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .avatar { width: 49px; height: 49px; background: var(--card-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; overflow: hidden; background-size: cover; background-position: center;}
-        
-        .app-title { text-align: center; font-size: 38px; margin-top: -15px; margin-bottom: 25px; font-weight: 300; letter-spacing: 2px;}
-        .page-title { font-size: 27px; margin-bottom: 20px; }
-
-        .btn, button, .profile-action-btn, .tag, .tab-full, .input-box, .nav-item {
-            transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease;
-        }
-        .btn:active, button:active, .profile-action-btn:active, .tag:active, .tab-full:active, .input-box:active, .nav-item:active {
-            transform: scale(0.96);
-            opacity: 0.9;
-        }
-
-        .service-card, .records-top-panel, .calendar-box, .modal-box { 
-            background: linear-gradient(145deg, #222223, #181819); 
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05); 
-            border: 1px solid rgba(255, 255, 255, 0.03); 
-            border-radius: 17px; position: relative; width: 100%;
-        }
-        
-        .service-card { padding: 18px; margin-bottom: 15px; }
-        .service-header { display: flex; align-items: flex-start; margin-bottom: 15px; justify-content: space-between; flex-wrap: nowrap; gap: 10px;}
-        .service-left { display: flex; align-items: center; flex: 1; min-width: 0;}
-        .service-icon { width: 34px; height: 34px; background: #979797; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 7px; letter-spacing: -0.09em; text-align:center; line-height: 8px; flex-shrink: 0; overflow: hidden;}
-        .service-title { font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;}
-        .service-time { font-size: 14px; color: var(--text-main); white-space: nowrap; margin-top: 4px;}
-        .service-status { font-size: 16px; margin-bottom: 15px; padding-right: 90px;}
-        .service-card.skeleton-card {
-            background: rgba(255, 255, 255, 0.02);
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
-            border: 1px dashed rgba(255, 255, 255, 0.15);
-            display: flex; align-items: center; justify-content: center;
-            min-height: 120px; text-align: center; padding: 20px; overflow: hidden;
-        }
-        .skeleton-text { color: var(--text-hint); font-size: 14px; line-height: 1.4; z-index: 2; font-weight: 300; }
-        .skeleton-card::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
-            animation: skeleton-loading 2s infinite ease-in-out;
-        }
-        @keyframes skeleton-loading { 100% { left: 200%; } }
-
-        .service-details { display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;}
-        .service-details.expanded { display: block; animation: fadeIn 0.3s ease; }
-        .details-text { font-size: 15px; margin-bottom: 10px; line-height: 1.4; color: #FFF;}
-
-        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        .tag { background: var(--card-bg); padding: 5px 15px; border-radius: 10px; font-size: 15px; cursor: pointer; user-select: none; }
-        .tag.active { background: var(--primary-btn); color: var(--text-main); box-shadow: 0 4px 10px rgba(51, 144, 236, 0.3);}
-
-        .btn { width: 100%; border-radius: 10px; padding: 10px; font-size: 20px; border: none; cursor: pointer; text-align: center; color: #FFF; letter-spacing: 0.07em;}
-        .btn-primary { background: var(--primary-btn); box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);}
-        .btn-outline { background: transparent; border: 1.5px solid var(--primary-btn); }
-        .btn-small { padding: 6px 16px; font-size: 15px; width: auto; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;}
-        
-        .btn-action-group { display: flex; gap: 10px; margin-top: 10px;}
-        .btn-approve { background: var(--primary-btn); flex: 1; border: 0.5px solid transparent; border-radius: 6px; padding: 10px; font-size: 12.5px; color: #FFFFFF; letter-spacing: 0.07em;}
-        .btn-reject { background: var(--card-bg); flex: 1; border: 0.5px solid #FFF; border-radius: 6px; padding: 10px; font-size: 12.5px; color: #FFFFFF; letter-spacing: 0.07em;}
-
-        .records-top-panel { padding: 30px 20px 0 20px; margin: 0 0 20px 0; height: auto; display: flex; flex-direction: column; justify-content: space-between; border-radius: 17px;}
-        .records-title { font-size: 27px; text-align: center; color: #FFF; margin-bottom: 20px;}
-        .tabs-container-full { display: flex; width: 100%; border-bottom: 1px solid #333;}
-        .tab-full { flex: 1; text-align: center; padding: 12px 10px; font-size: 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;}
-        .tab-full.active { border-bottom: 2px solid #FFFFFF; color: #FFF; font-weight: 600;}
-
-        .record-card { position: relative; }
-        .record-card .record-cancel { position: absolute; right: 18px; bottom: 65px; z-index: 10;}
-
-        .input-box { border: 1.5px solid var(--primary-btn); border-radius: 7px; padding: 8px 15px; font-size: 20px; display: inline-flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; position: relative; width: 196px;}
-        .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; z-index: 10; margin-top: 5px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
-        .dropdown-menu.active { display: block; animation: fadeIn 0.2s;}
-        .dropdown-item { padding: 10px 15px; border-bottom: 1px solid #333; font-size: 16px; }
-        
-        .slot-address, .slot-description { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 20px; }
-        .slot-address input, .slot-description textarea { flex: 1; min-width: 0; background: var(--bg-color); color: #fff; border: 1px solid #444; border-radius: 7px; padding: 8px 10px; font: inherit; font-size: 14px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
-        .slot-description { align-items: flex-start; }
-        .slot-description textarea { min-height: 70px; resize: vertical; }
-        .slot-city { flex-direction: column; align-items: stretch; gap: 7px; }
-        .slot-city select { width: 100%; background: var(--bg-color); color: #fff; border: 1px solid #444; border-radius: 7px; padding: 9px 10px; font: inherit; font-size: 14px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
-
-        .calendar-box { padding: 20px; display: flex; flex-direction: column;}
-        .calendar-header { text-align: center; font-size: 20px; margin-bottom: 15px;}
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex-grow: 1;}
-        .calendar-day-name { font-size: 12px; color: var(--text-hint); text-align: center; display: flex; align-items: center; justify-content: center;}
-        .calendar-day { 
-            display: flex; align-items: center; justify-content: center; font-size: 16px; 
-            background: #2A2A2B; width: 38px; height: 38px; margin: 0 auto; 
-            border-radius: 50%; cursor: pointer; transition: 0.2s;
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .calendar-day.selected { 
-            background: var(--primary-btn); color: #FFF; font-weight: 600;
-            box-shadow: 0 4px 12px rgba(51, 144, 236, 0.4);
-        }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(5px);}
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { padding: 25px 15px; width: 333px; text-align: center; transform: scale(0.9); transition: 0.3s;}
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 17px; margin-bottom: 20px; color: #FFF;}
-        .modal-buttons { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; background: transparent; border: 0.5px solid #FFF; border-radius: 6px; padding: 12px 5px; color: #FFF; font-size: 12.5px; cursor: pointer; letter-spacing: 0.07em;}
-
-        .bottom-nav { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            width: 333px; height: 56px; border-radius: 28px; display: flex; z-index: 100;
-            background: rgba(28, 28, 29, 0.65);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .nav-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 56px; color: var(--text-hint); cursor: pointer; z-index: 2; flex: 1;}
-        .nav-item.active { color: #FFFFFF; }
-        .nav-indicator { 
-            position: absolute; top: 0; height: 56px; border-radius: 28px; z-index: 1; transition: 0.3s ease; pointer-events: none;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
-        }
-        .nav-icon { height: 22px; width: auto; margin-bottom: 2px;}
-        #bottom-navigation .nav-item:nth-child(2) .nav-icon { height: 26px; }
-        .nav-text { font-family: 'Inter'; font-size: 10px; letter-spacing: 0.07em;}
-        
-        .profile-header { text-align: center; margin-bottom: 24px;}
-        .profile-avatar { width: 149px; height: 149px; background: #D9D9D9; border-radius: 50%; margin: 20px auto; display:flex; align-items:center; justify-content:center; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 6px 15px rgba(0,0,0,0.5);}
-        .profile-name { font-size: 27px; margin-top: 5px; cursor: pointer;}
-        .profile-role { font-size: 16px; color: var(--text-hint); margin-top: -2px; margin-bottom: 10px;}
-        
-        .profile-actions { display: flex; gap: 10px; max-width: 333px; margin: 0 auto 30px auto;}
-        .profile-action-btn { flex: 1; background: var(--primary-btn); border-radius: 13px; padding: 15px 5px; text-align: center; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);}
-        
-        .profile-bottom-actions { display: flex; gap: 10px; max-width: 333px; margin: 0 auto;}
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <div class="modal-overlay" id="modal-reject" onclick="closeModal('modal-reject')">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-title">Почему вы хотите отклонить заявку?</div>
-            <div class="modal-buttons">
-                <button class="modal-btn" onclick="reviewApplication()">Изменились планы</button>
-                <button class="modal-btn" onclick="reviewApplication()">Не подходит модель</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-cancel" onclick="closeModal('modal-cancel')">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-title">Вы уверены, что хотите отменить запись?</div>
-            <div class="modal-buttons">
-                <button class="modal-btn" onclick="removeRecord()">Да!</button>
-                <button class="modal-btn" onclick="closeModal('modal-cancel')">Отменить действия</button>
-            </div>
-        </div>
-    </div>
-
     <div id="screen-model-menu" class="screen active">
         <div class="header">
             <div class="avatar" data-avatar></div>
@@ -190,7 +18,6 @@
         </div>
         <div class="app-title">BB</div>
         <div class="page-title">Выберите услугу</div>
-
         <div id="model-menu-services"></div>
     </div>
 
@@ -200,18 +27,15 @@
             <div style="width: 24px;"></div>
         </div>
         <div class="app-title">BB</div>
-        
         <div class="tags-container" id="service-tags"></div>
-
-        <div class="input-box" style="border: none; padding: 0; font-size: 17px; width: auto; margin-bottom: 20px; gap: 10px; box-shadow: none; background: transparent;" onclick="toggleDropdown('city-dropdown')">
+        <div class="input-box" style="border: none; padding: 0; font-size: 17px; width: auto; margin-bottom: 20px; gap: 10px;" onclick="window.toggleDropdown('city-dropdown')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
             <span id="selected-city">Город</span>
             <div class="dropdown-menu" id="city-dropdown" style="width: 250px;">
-                <div class="dropdown-item" onclick="selectItem('selected-city', 'city-dropdown', 'Москва', event)">Москва</div>
-                <div class="dropdown-item" onclick="selectItem('selected-city', 'city-dropdown', 'Санкт-Петербург', event)">Санкт-Петербург</div>
+                <div class="dropdown-item" onclick="window.selectItem('selected-city', 'city-dropdown', 'Москва', event)">Москва</div>
+                <div class="dropdown-item" onclick="window.selectItem('selected-city', 'city-dropdown', 'Санкт-Петербург', event)">Санкт-Петербург</div>
             </div>
         </div>
-        
         <div id="model-search-results"></div>
     </div>
 
@@ -221,7 +45,6 @@
         </div>
         <div class="model-success-header" style="font-size: 30px; font-weight: 600; text-align: center; margin: 20px 0;">Заявка отправлена!</div>
         <div class="model-success-sub" id="succ-subtitle" style="font-size: 17px; text-align: center; margin-bottom: 40px;">Мастер скоро подтвердит вашу<br>запись</div>
-
         <div class="booking-details" style="width: 100%; padding-left: 20px;">
             <div style="display: flex; margin-bottom: 12px; font-size: 19px;"><span style="width: 100px; font-weight: 300;">Сервис</span><span id="succ-val-name" style="flex: 1;"></span></div>
             <div style="display: flex; margin-bottom: 12px; font-size: 19px;"><span style="width: 100px; font-weight: 300;">Дата</span><span id="succ-val-date" style="flex: 1;"></span></div>
@@ -232,19 +55,15 @@
                 <span style="flex: 1;"><span style="font-size: 12px; display: block; margin-top: 5px; line-height: 15px;">предоставим контакт мастера<br>после подтверждения записи</span></span>
             </div>
         </div>
-
-        <button class="btn btn-primary" style="border-radius: 26.5px; margin-top: 40px;" onclick="navigate('screen-model-menu')">Вернуться на главную</button>
+        <button class="btn btn-primary" style="border-radius: 26.5px; margin-top: 40px;" onclick="window.navigate('screen-model-menu')">Вернуться на главную</button>
     </div>
 
-    <div id="screen-model-records" class="screen">
+    <div id="screen-model-records" class="screen" style="padding: 0;">
         <div class="records-top-panel">
             <div class="records-title">Мои записи</div>
-            <div class="tabs-container-full">
-                <div class="tab-full active" onclick="switchTabFull(this)">Активные</div>
-                <div class="tab-full" onclick="switchTabFull(this)">Архив</div>
-            </div>
+            
         </div>
-        <div id="model-records-list"></div>
+        <div class="records-list" id="model-records-list"></div>
     </div>
 
     <div id="screen-model-profile" class="screen">
@@ -253,26 +72,13 @@
             <div class="profile-avatar" id="model-profile-avatar" data-avatar></div>
             <div class="profile-name" id="model-profile-name" title="Нажмите, чтобы изменить никнейм">Никнейм</div>
         </div>
-        
         <div class="profile-actions">
-            <div class="profile-action-btn" onclick="navigate('screen-model-search')">
-                <svg width="28" height="28" viewBox="0 0 37 37"><path d="M30.0394 31.0708L20.3855 21.4168C19.6146 22.0736 18.7282 22.5818 17.7261 22.9415C16.724 23.3013 15.7168 23.4811 14.7044 23.4811C12.2398 23.4811 10.1514 22.625 8.43908 20.9127C6.72681 19.1994 5.87067 17.1105 5.87067 14.6458C5.87067 12.1812 6.72681 10.0928 8.43908 8.38051C10.1514 6.66823 12.2398 5.81158 14.7044 5.81055C17.169 5.80952 19.258 6.66617 20.9713 8.38051C22.6846 10.0948 23.5407 12.1833 23.5397 14.6458C23.5397 15.7168 23.3501 16.7533 22.9708 17.7554C22.5916 18.7575 22.0931 19.6146 21.4754 20.3269L31.1293 29.9793L30.0394 31.0708ZM14.706 21.9379C16.7512 21.9379 18.4779 21.2339 19.886 19.8258C21.294 18.4178 21.998 16.6906 21.998 14.6443C21.998 12.598 21.294 10.8713 19.886 9.4643C18.4779 8.05727 16.7512 7.35324 14.706 7.35221C12.6607 7.35119 10.9335 8.05521 9.52442 9.4643C8.11533 10.8734 7.41131 12.6 7.41233 14.6443C7.41336 16.6885 8.11739 18.4152 9.52442 19.8243C10.9314 21.2334 12.6581 21.9374 14.7044 21.9364" fill="white"/></svg>
-                Найти услугу
-            </div>
-            <div class="profile-action-btn" onclick="navigate('screen-model-records')">
-                <svg width="28" height="28" viewBox="0 0 31 31"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.5 28.1777C15.106 28.1777 14.7121 28.0356 14.4021 27.7515L10.9275 24.5417H6.13541C5.19387 24.54 4.29137 24.1652 3.6256 23.4994C2.95982 22.8336 2.58504 21.9311 2.58333 20.9896V7.42708C2.58504 6.48554 2.95982 5.58304 3.6256 4.91727C4.29137 4.25149 5.19387 3.87671 6.13541 3.875H24.8646C25.8061 3.87671 26.7086 4.25149 27.3744 4.91727C28.0402 5.58304 28.415 6.48554 28.4167 7.42708V20.9896C28.415 21.9311 28.0402 22.8336 27.3744 23.4994C26.7086 24.1652 25.8061 24.54 24.8646 24.5417H20.0725L16.5979 27.7515C16.2879 28.0356 15.894 28.1777 15.5 28.1777ZM6.13541 5.8125C5.24416 5.8125 4.52083 6.53583 4.52083 7.42708V20.9896C4.52083 21.8808 5.24416 22.6042 6.13541 22.6042H11.6831L15.5 26.1304L19.3169 22.6042H24.8646C25.7558 22.6042 26.4792 21.8808 26.4792 20.9896V7.42708C26.4792 6.53583 25.7558 5.8125 24.8646 5.8125H6.13541ZM22.6042 10.3333H8.39583V12.2708H22.6042V10.3333ZM8.39583 16.1458H17.4375V18.0833H8.39583V16.1458Z" fill="white"/></svg>
-                Мои записи
-            </div>
+            <div class="profile-action-btn" onclick="window.navigate('screen-model-search')">Найти услугу</div>
+            <div class="profile-action-btn" onclick="window.navigate('screen-model-records')">Мои записи</div>
         </div>
-        
         <div class="profile-bottom-actions">
-            <button class="btn btn-outline" style="border-radius: 13px; border-color: #3390EC; flex: 1.5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px; font-family:'Inter'; font-size: 15px;" onclick="switchRole('master')">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M8 11C9.326 11 10.597 10.473 11.535 9.535C12.473 8.597 13 7.326 13 6C13 4.673 12.473 3.402 11.535 2.464C10.597 1.526 9.326 1 8 1C6.673 1 5.402 1.526 4.464 2.464C3.526 3.402 3 4.673 3 6C3 7.326 3.526 8.597 4.464 9.535C5.402 10.473 6.673 11 8 11ZM8 11C10.013 11 11.772 11.76 13.023 13.023C13.764 13.775 14.319 14.69 14.643 15.696M8 11C4 11 1 14 1 18V23H11M12 18.824L16.19 22L23 13" stroke="white" stroke-width="2" fill="none"/></svg>
+            <button class="btn btn-outline" style="border-radius: 13px; width: 100%; padding:15px; font-family:'Inter'; font-size: 15px;" onclick="window.switchRole('master')">
                 <span>Стать мастером</span>
-            </button>
-            <button class="btn btn-outline" style="border-radius: 13px; background:#1C1C1D; border:none; flex: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px; font-family:'Inter'; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                <svg width="27" height="27" viewBox="0 0 27 27"><path d="M22.455 11.452C22.151 7.83 20.036 2.25 13.5 2.25C11.767 2.25 10.338 2.643 9.18 3.296L12.532 4.556H12.543C12.847 4.522 13.162 4.5 13.5 4.5C18.855 4.5 19.957 9.416 20.182 11.486C19.603 11.722 19.108 12.126 18.76 12.645C18.411 13.164 18.225 13.774 18.225 14.4V15.975C18.225 17.19 18.922 18.281 20.013 18.81C19.541 19.698 18.337 20.902 15.378 21.262C15.05 20.761 14.538 20.409 13.951 20.285C13.365 20.161 12.754 20.273 12.251 20.598C11.205 21.285 10.912 22.68 11.598 23.726C12.273 24.772 13.668 25.065 14.715 24.378C15.052 24.165 15.322 23.861 15.502 23.501C20.328 22.95 21.87 20.463 22.353 18.956C22.983 18.75 23.531 18.351 23.921 17.816C24.311 17.281 24.522 16.637 24.525 15.975V14.4C24.525 13.083 23.692 11.902 22.455 11.452ZM22.275 15.975C22.275 16.47 21.87 16.875 21.375 16.875C20.88 16.875 20.475 16.47 20.475 15.975V14.4C20.475 13.905 20.88 13.5 21.375 13.5C21.87 13.5 22.275 13.905 22.275 14.4V15.975ZM5.613 11.25C3.881 11.25 2.463 12.656 2.463 14.4V15.986C2.463 17.718 3.87 19.136 5.613 19.136C7.357 19.136 8.763 17.73 8.763 15.986V14.4C8.763 12.667 7.357 11.25 5.613 11.25ZM6.513 15.986C6.513 16.481 6.108 16.886 5.613 16.886C5.118 16.886 4.713 16.481 4.713 15.986V14.4C4.713 13.905 5.118 13.5 5.613 13.5C6.108 13.5 6.513 13.905 6.513 14.4V15.986ZM7.267 5.118L10.125 6.187L7.267 7.256L6.187 10.125L5.118 7.256L2.25 6.187L5.118 5.118L6.187 2.25L7.267 5.118Z" fill="white"/></svg>
-                <span style="white-space: nowrap; font-size: 12px; line-height: 14px;">Написать в<br>поддержку</span>
             </button>
         </div>
     </div>
@@ -284,53 +90,35 @@
         </div>
         <div class="app-title">BB</div>
         
-        <button class="btn btn-primary" style="border-radius: 27px; max-width: 260px; height: 134px; margin: 0 auto 30px auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 10px;" onclick="navigate('screen-master-add')">
-            <svg width="47" height="47" viewBox="0 0 30 30" fill="none"><path d="M15 28.125C7.762 28.125 1.875 22.237 1.875 15C1.875 7.762 7.762 1.875 15 1.875C22.237 1.875 28.125 7.762 28.125 15C28.125 22.237 22.237 28.125 15 28.125ZM15 3.75C8.793 3.75 3.75 8.793 3.75 15C3.75 21.206 8.793 26.25 15 26.25C21.206 26.25 26.25 21.206 26.25 15C26.25 8.793 21.206 3.75 15 3.75Z" fill="white"/><path d="M15 21.562C14.475 21.562 14.062 21.15 14.062 20.625V9.375C14.062 8.85 14.475 8.437 15 8.437C15.525 8.437 15.937 8.85 15.937 9.375V20.625C15.937 21.15 15.525 21.562 15 21.562Z" fill="white"/><path d="M20.625 15.937H9.375C8.85 15.937 8.437 15.525 8.437 15C8.437 14.475 8.85 14.062 9.375 14.062H20.625C21.15 14.062 21.562 14.475 21.562 15C21.562 15.525 21.15 15.937 20.625 15.937Z" fill="white"/></svg>
-            <span style="font-size: 20px; white-space: nowrap;">Создать новый слот</span>
+        <button class="btn btn-primary" style="border-radius: 27px; max-width: 260px; height: 134px; margin: 0 auto 30px auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 10px;" onclick="window.navigate('screen-master-add')">
+            <span style="font-size: 27px; white-space: nowrap;">Создать новый слот</span>
         </button>
 
         <div class="page-title" style="font-size: 22px;">Заявки на рассмотрение</div>
-        
-        <div class="service-card master-application-card" id="master-application-card" style="display:none; background: var(--card-bg); border: none;">
-            <div class="service-header" style="margin-bottom: 5px;">
-                <div class="service-left"><div class="service-icon">картинка<br>услуги</div><div class="service-title">Название услуги</div></div>
-                <div class="service-time">дата и время</div>
-            </div>
-            <div class="service-status" style="text-align: center; padding: 0;">статус: на рассмотрении</div>
-            <div class="btn-action-group">
-                <button class="btn-approve" onclick="reviewApplication()">Одобрить</button>
-                <button class="btn-reject" onclick="openModal('modal-reject')">Отклонить</button>
-            </div>
+        <div class="empty-state" id="master-empty-state" style="text-align: center; color: var(--text-hint); margin-top: 40px; font-size: 17px;">
+            На данный момент<br>нет активных заявок
         </div>
-
-        <div id="master-empty-state" style="display:none;"></div>
     </div>
 
-    <div id="screen-master-records" class="screen">
+    <div id="screen-master-records" class="screen" style="padding: 0;">
         <div class="records-top-panel">
             <div class="records-title">Мои слоты</div>
-            <div class="tabs-container-full">
-                <div class="tab-full active" onclick="switchTabFull(this)">Активные</div>
-                <div class="tab-full" onclick="switchTabFull(this)">Архив</div>
-            </div>
         </div>
-        <div id="master-records-list"></div>
+        <div class="records-list" id="master-records-list"></div>
     </div>
 
     <div id="screen-master-add" class="screen">
         <div class="header" style="justify-content: flex-start; gap: 20px;">
-            <div style="cursor: pointer;" onclick="navigate('screen-master-menu')">
-                <svg width="43" height="43" viewBox="0 0 43 43" fill="none"><path d="M36.12 21.5001C36.12 29.5841 29.584 36.1201 21.5 36.1201C13.416 36.1201 6.88 29.5841 6.88 21.5001C6.88 13.4161 13.416 6.88012 21.5 6.88012C29.584 6.88012 36.12 13.4161 36.12 21.5001ZM8.6 21.5001C8.6 28.6381 14.362 34.4001 21.5 34.4001C28.638 34.4001 34.4 28.6381 34.4 21.5001C34.4 14.3621 28.638 8.60012 21.5 8.60012C14.362 8.60012 8.6 14.3621 8.6 21.5001Z" fill="white"/><path d="M22.962 14.3618L15.824 21.4998L22.962 28.6378L21.758 29.8418L13.416 21.4998L21.758 13.1578L22.962 14.3618Z" fill="white"/><path d="M14.62 22.3599V20.6399H29.24V22.3599H14.62Z" fill="white"/></svg>
-            </div>
+            <div style="cursor: pointer;" onclick="window.navigate('screen-master-menu')">Назад</div>
             <div class="page-title" style="margin: 0;">Добавление слота</div>
         </div>
 
-        <div class="input-box" onclick="toggleDropdown('service-dropdown')">
-            <span id="selected-service" style="color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Выберите услугу</span>
+        <div class="input-box" onclick="window.toggleDropdown('service-dropdown')">
+            <span id="selected-service" style="color: #FFF;">Выберите услугу</span>
             <div class="dropdown-menu" id="service-dropdown">
-                <div class="dropdown-item" onclick="selectItem('selected-service', 'service-dropdown', 'Маникюр', event)">Маникюр</div>
-                <div class="dropdown-item" onclick="selectItem('selected-service', 'service-dropdown', 'Педикюр', event)">Педикюр</div>
-                <div class="dropdown-item" onclick="selectItem('selected-service', 'service-dropdown', 'Брови', event)">Брови</div>
+                <div class="dropdown-item" onclick="window.selectItem('selected-service', 'service-dropdown', 'Маникюр', event)">Маникюр</div>
+                <div class="dropdown-item" onclick="window.selectItem('selected-service', 'service-dropdown', 'Педикюр', event)">Педикюр</div>
+                <div class="dropdown-item" onclick="window.selectItem('selected-service', 'service-dropdown', 'Брови', event)">Брови</div>
             </div>
         </div>
 
@@ -345,14 +133,6 @@
             <span>Адрес</span>
             <input id="slot-address-input" type="text" placeholder="Введите адрес">
         </label>
-        
-        <div style="margin-bottom: 5px; font-size: 20px; display:flex; align-items:center; gap: 10px;">
-            Фото работ
-            <button class="btn-primary" style="width: 54px; height: 24px; font-size: 17px; border-radius: 3px; border:none; color:#FFF; cursor:pointer;" onclick="document.getElementById('photo-upload').click()">Add</button>
-            <input type="file" id="photo-upload" style="display: none;" multiple accept="image/*">
-            <button class="btn-primary" style="width: 126px; height: 14px; font-size: 7px; border-radius: 3px; border:none; color:#FFF; cursor:pointer;">Вставить с предыдущего слота</button>
-        </div>
-        <div style="font-size: 7px; color:#FFF; margin-bottom: 20px; line-height: 11px;">По желанию можете указать свои работы или то, что<br>планируете сделать</div>
 
         <label class="slot-description">
             <span>Описание:</span>
@@ -360,12 +140,18 @@
         </label>
 
         <div class="page-title" style="font-size: 20px; margin-bottom: 5px;">Укажите дату и время</div>
+        
+        <label class="slot-address">
+            <span>Время:</span>
+            <input id="slot-time-input" type="time" required style="font-size: 18px;">
+        </label>
+
         <div class="calendar-box">
-            <div class="calendar-header">Август 2026</div>
+            <div class="calendar-header" id="calendar-header">Загрузка...</div>
             <div class="calendar-grid" id="calendar-grid"></div>
         </div>
 
-        <button class="btn btn-primary" style="border-radius: 27px; font-size: 22px; padding: 15px;" onclick="createRealSlot()">Опубликовать слот</button>
+        <button class="btn btn-primary" style="border-radius: 27px; font-size: 22px; padding: 15px;" onclick="window.createRealSlot()">Опубликовать слот</button>
     </div>
 
     <div id="screen-master-profile" class="screen">
@@ -378,522 +164,29 @@
         </div>
         
         <div class="profile-actions">
-            <div class="profile-action-btn" onclick="navigate('screen-master-add')">
-                <svg width="28" height="28" viewBox="0 0 30 30"><path d="M15 28.125C7.762 28.125 1.875 22.237 1.875 15C1.875 7.762 7.762 1.875 15 1.875C22.237 1.875 28.125 7.762 28.125 15C28.125 22.237 22.237 28.125 15 28.125ZM15 3.75C8.793 3.75 3.75 8.793 3.75 15C3.75 21.206 8.793 26.25 15 26.25C21.206 26.25 26.25 21.206 26.25 15C26.25 8.793 21.206 3.75 15 3.75Z" fill="white"/><path d="M15 21.562C14.475 21.562 14.062 21.15 14.062 20.625V9.375C14.062 8.85 14.475 8.437 15 8.437C15.525 8.437 15.937 8.85 15.937 9.375V20.625C15.937 21.15 15.525 21.562 15 21.562Z" fill="white"/><path d="M20.625 15.937H9.375C8.85 15.937 8.437 15.525 8.437 15C8.437 14.475 8.85 14.062 9.375 14.062H20.625C21.15 14.062 21.562 14.475 21.562 15C21.562 15.525 21.15 15.937 20.625 15.937Z" fill="white"/></svg>
-                Добавить слот
-            </div>
-            <div class="profile-action-btn" onclick="navigate('screen-master-records')">
-                <svg width="28" height="28" viewBox="0 0 31 31"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.5 28.1777C15.106 28.1777 14.7121 28.0356 14.4021 27.7515L10.9275 24.5417H6.13541C5.19387 24.54 4.29137 24.1652 3.6256 23.4994C2.95982 22.8336 2.58504 21.9311 2.58333 20.9896V7.42708C2.58504 6.48554 2.95982 5.58304 3.6256 4.91727C4.29137 4.25149 5.19387 3.87671 6.13541 3.875H24.8646C25.8061 3.87671 26.7086 4.25149 27.3744 4.91727C28.0402 5.58304 28.415 6.48554 28.4167 7.42708V20.9896C28.415 21.9311 28.0402 22.8336 27.3744 23.4994C26.7086 24.1652 25.8061 24.54 24.8646 24.5417H20.0725L16.5979 27.7515C16.2879 28.0356 15.894 28.1777 15.5 28.1777ZM6.13541 5.8125C5.24416 5.8125 4.52083 6.53583 4.52083 7.42708V20.9896C4.52083 21.8808 5.24416 22.6042 6.13541 22.6042H11.6831L15.5 26.1304L19.3169 22.6042H24.8646C25.7558 22.6042 26.4792 21.8808 26.4792 20.9896V7.42708C26.4792 6.53583 25.7558 5.8125 24.8646 5.8125H6.13541ZM22.6042 10.3333H8.39583V12.2708H22.6042V10.3333ZM8.39583 16.1458H17.4375V18.0833H8.39583V16.1458Z" fill="white"/></svg>
-                Записи
-            </div>
+            <div class="profile-action-btn" onclick="window.navigate('screen-master-add')">Добавить слот</div>
+            <div class="profile-action-btn" onclick="window.navigate('screen-master-records')">Записи</div>
         </div>
         
         <div class="profile-bottom-actions">
-            <button class="btn btn-outline" style="border-radius: 13px; border-color: #3390EC; flex: 1.5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px; font-family:'Inter'; font-size: 15px;" onclick="switchRole('model')">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M8 11C9.326 11 10.597 10.473 11.535 9.535C12.473 8.597 13 7.326 13 6C13 4.673 12.473 3.402 11.535 2.464C10.597 1.526 9.326 1 8 1C6.673 1 5.402 1.526 4.464 2.464C3.526 3.402 3 4.673 3 6C3 7.326 3.526 8.597 4.464 9.535C5.402 10.473 6.673 11 8 11ZM8 11C10.013 11 11.772 11.76 13.023 13.023C13.764 13.775 14.319 14.69 14.643 15.696M8 11C4 11 1 14 1 18V23H11M12 18.824L16.19 22L23 13" stroke="white" stroke-width="2" fill="none"/></svg>
+            <button class="btn btn-outline" style="border-radius: 13px; width: 100%; padding:15px; font-family:'Inter'; font-size: 15px;" onclick="window.switchRole('model')">
                 <span>Стать моделью</span>
-            </button>
-            <button class="btn btn-outline" style="border-radius: 13px; background:#1C1C1D; border:none; flex: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px; font-family:'Inter'; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                <svg width="27" height="27" viewBox="0 0 27 27"><path d="M22.455 11.452C22.151 7.83 20.036 2.25 13.5 2.25C11.767 2.25 10.338 2.643 9.18 3.296L12.532 4.556H12.543C12.847 4.522 13.162 4.5 13.5 4.5C18.855 4.5 19.957 9.416 20.182 11.486C19.603 11.722 19.108 12.126 18.76 12.645C18.411 13.164 18.225 13.774 18.225 14.4V15.975C18.225 17.19 18.922 18.281 20.013 18.81C19.541 19.698 18.337 20.902 15.378 21.262C15.05 20.761 14.538 20.409 13.951 20.285C13.365 20.161 12.754 20.273 12.251 20.598C11.205 21.285 10.912 22.68 11.598 23.726C12.273 24.772 13.668 25.065 14.715 24.378C15.052 24.165 15.322 23.861 15.502 23.501C20.328 22.95 21.87 20.463 22.353 18.956C22.983 18.75 23.531 18.351 23.921 17.816C24.311 17.281 24.522 16.637 24.525 15.975V14.4C24.525 13.083 23.692 11.902 22.455 11.452ZM22.275 15.975C22.275 16.47 21.87 16.875 21.375 16.875C20.88 16.875 20.475 16.47 20.475 15.975V14.4C20.475 13.905 20.88 13.5 21.375 13.5C21.87 13.5 22.275 13.905 22.275 14.4V15.975ZM5.613 11.25C3.881 11.25 2.463 12.656 2.463 14.4V15.986C2.463 17.718 3.87 19.136 5.613 19.136C7.357 19.136 8.763 17.73 8.763 15.986V14.4C8.763 12.667 7.357 11.25 5.613 11.25ZM6.513 15.986C6.513 16.481 6.108 16.886 5.613 16.886C5.118 16.886 4.713 16.481 4.713 15.986V14.4C4.713 13.905 5.118 13.5 5.613 13.5C6.108 13.5 6.513 13.905 6.513 14.4V15.986ZM7.267 5.118L10.125 6.187L7.267 7.256L6.187 10.125L5.118 7.256L2.25 6.187L5.118 5.118L6.187 2.25L7.267 5.118Z" fill="white"/></svg>
-                <span style="white-space: nowrap; font-size: 12px; line-height: 14px;">Написать в<br>поддержку</span>
             </button>
         </div>
     </div>
 
     <div id="screen-master-success" class="screen" style="padding-top: 80px;">
         <div style="display:flex; justify-content:center; align-items:center; flex-direction:column;">
-            <div class="check-card">
-                <svg width="83" height="83" viewBox="0 0 83 83" fill="none"><path d="M36.312 55.542L23.343 42.571L27.008 38.906L36.312 48.207L55.986 28.531L59.656 32.201L36.312 55.542Z" fill="white"/><path d="M41.5 5.187C34.318 5.187 27.297 7.317 21.325 11.307C15.354 15.297 10.7 20.968 7.951 27.603C5.203 34.239 4.484 41.54 5.885 48.584C7.286 55.628 10.744 62.098 15.823 67.176C20.901 72.255 27.371 75.713 34.415 77.114C41.459 78.515 48.761 77.796 55.396 75.048C62.031 72.3 67.702 67.645 71.692 61.674C75.682 55.702 77.81 48.681 77.81 41.5C77.81 31.869 73.986 22.633 67.176 15.823C60.366 9.013 51.13 5.187 41.5 5.187ZM41.5 72.625C35.344 72.625 29.326 70.799 24.207 67.379C19.089 63.959 15.1 59.098 12.744 53.411C10.388 47.723 9.772 41.465 10.973 35.427C12.174 29.39 15.138 23.844 19.491 19.491C23.844 15.138 29.39 12.174 35.427 10.973C41.465 9.772 47.723 10.388 53.411 12.744C59.098 15.1 63.959 19.089 67.379 24.207C70.799 29.326 72.625 35.344 72.625 41.5C72.625 49.754 69.345 57.671 63.508 63.508C57.671 69.345 49.754 72.625 41.5 72.625Z" fill="white"/></svg>
-                <div class="app-title" style="margin-top: 20px; font-size: 20px;">Слот опубликован!</div>
-            </div>
-            <button class="btn btn-primary" style="border-radius: 26px; margin-top: 20px; width: 297px;" onclick="navigate('screen-master-menu')">На главную</button>
+            <div class="app-title" style="margin-top: 20px; font-size: 20px;">Слот опубликован!</div>
+            <button class="btn btn-primary" style="border-radius: 26px; margin-top: 20px; width: 297px;" onclick="window.navigate('screen-master-menu')">На главную</button>
         </div>
     </div>
 
     <div class="bottom-nav" id="bottom-navigation">
         <div class="nav-indicator" id="nav-indicator"></div>
     </div>
-
-    <script>
-        const supabaseUrl = 'https://bxzwfidujuejmrbqjmgo.supabase.co';
-        const supabaseKey = 'sb_publishable_eQsfW9mYbM1i3Vhwr7h8ig_jM29E24C';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-        
-        const getSkeleton = (text) => `<div class="service-card skeleton-card"><div class="skeleton-text">${text}</div></div>`;
-
-        const icons = {
-            menu: `<svg class="nav-icon" viewBox="0 0 31 38" fill="none"><path d="M24.54 6.458H6.458C5.744 6.458 5.166 7.036 5.166 7.75V11.625C5.166 12.338 5.744 12.916 6.458 12.916H24.54C25.255 12.916 25.833 12.338 25.833 11.625V7.75C25.833 7.036 25.255 6.458 24.54 6.458Z" stroke="currentColor"/><path d="M24.54 18.083H6.458C5.744 18.083 5.166 18.661 5.166 19.375V23.25C5.166 23.963 5.744 24.541 6.458 24.541H24.54C25.255 24.541 25.833 23.963 25.833 23.25V19.375C25.833 18.661 25.255 18.083 24.54 18.083Z" stroke="currentColor"/></svg>`,
-            search: `<svg class="nav-icon" viewBox="0 0 33 38" fill="none"><path d="M26.98 26.872L18.63 18.522C17.964 19.09 17.197 19.53 16.33 19.841C15.464 20.152 14.592 20.308 13.717 20.308C11.585 20.308 9.779 19.567 8.298 18.086C6.817 16.604 6.077 14.798 6.077 12.666C6.077 10.535 6.817 8.728 8.298 7.248C9.779 5.767 11.585 5.026 13.717 5.025C15.848 5.024 17.655 5.765 19.137 7.248C20.619 8.73 21.359 10.536 21.358 12.666C21.358 13.592 21.194 14.489 20.866 15.356C20.538 16.222 20.107 16.964 19.573 17.58L27.922 25.928L26.98 26.872ZM13.718 18.973C15.487 18.973 16.98 18.364 18.198 17.146C19.416 15.928 20.025 14.435 20.025 12.665C20.025 10.895 19.416 9.402 18.198 8.185C16.98 6.968 15.487 6.359 13.718 6.358C11.949 6.357 10.456 6.966 9.237 8.185C8.018 9.404 7.409 10.897 7.41 12.665C7.411 14.433 8.02 15.926 9.237 17.145C10.454 18.364 11.947 18.972 13.717 18.972" fill="currentColor"/></svg>`,
-            records: `<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.75 3C19.5449 3 21 4.45507 21 6.25V17.75C21 19.5449 19.5449 21 17.75 21H6.25C4.45507 21 3 19.5449 3 17.75V6.25C3 4.45507 4.45507 3 6.25 3H17.75ZM17.75 4.5H6.25C5.2835 4.5 4.5 5.2835 4.5 6.25V8H19.5V6.25C19.5 5.2835 18.7165 4.5 17.75 4.5ZM19.5 9.5H4.5V17.75C4.5 18.7165 5.2835 19.5 6.25 19.5H17.75C18.7165 19.5 19.5 18.7165 19.5 17.75V9.5ZM8 11.5C8.41421 11.5 8.75 11.8358 8.75 12.25C8.75 12.6642 8.41421 13 8 13C7.58579 13 7.25 12.6642 7.25 12.25C7.25 11.8358 7.58579 11.5 8 11.5ZM12 11.5C12.4142 11.5 12.75 11.8358 12.75 12.25C12.75 12.6642 12.4142 13 12 13C11.5858 13 11.25 12.6642 11.25 12.25C11.25 11.8358 11.5858 11.5 12 11.5ZM16 11.5C16.4142 11.5 16.75 11.8358 16.75 12.25C16.75 12.6642 16.4142 13 16 13C15.5858 13 15.25 12.6642 15.25 12.25C15.25 11.8358 15.5858 11.5 16 11.5ZM8 15.5C8.41421 15.5 8.75 15.8358 8.75 16.25C8.75 16.6642 8.41421 17 8 17C7.58579 17 7.25 16.6642 7.25 16.25C7.25 15.8358 7.58579 15.5 8 15.5ZM12 15.5C12.4142 15.5 12.75 15.8358 12.75 16.25C12.75 16.6642 12.4142 17 12 17C11.5858 17 11.25 16.6642 11.25 16.25C11.25 15.8358 11.5858 15.5 12 15.5Z"/></svg>`,
-            profile: `<svg class="nav-icon" viewBox="0 0 45 39" fill="none"><circle cx="23" cy="13" r="13" fill="#1C1C1D"/><path d="M15.186 15.192C15.013 15.192 14.856 15.16 14.715 15.095C14.574 15.028 14.462 14.933 14.38 14.809C14.297 14.683 14.255 14.532 14.255 14.354C14.255 14.198 14.286 14.071 14.348 13.974C14.409 13.876 14.491 13.799 14.594 13.744C14.697 13.688 14.811 13.646 14.935 13.619C15.061 13.591 15.187 13.568 15.313 13.552C15.479 13.53 15.614 13.514 15.717 13.504C15.821 13.492 15.896 13.472 15.944 13.445C15.992 13.418 16.017 13.371 16.017 13.303V13.289C16.017 13.114 15.969 12.978 15.873 12.881C15.778 12.784 15.634 12.735 15.441 12.735C15.241 12.735 15.084 12.779 14.971 12.866C14.857 12.954 14.777 13.047 14.731 13.147L14.333 13.005C14.404 12.839 14.499 12.71 14.617 12.618C14.737 12.524 14.867 12.459 15.008 12.422C15.15 12.385 15.29 12.366 15.427 12.366C15.515 12.366 15.615 12.376 15.729 12.398C15.844 12.418 15.954 12.46 16.061 12.524C16.169 12.588 16.258 12.684 16.329 12.813C16.400 12.942 16.436 13.115 16.436 13.332V15.128H16.017V14.759H15.995C15.967 14.818 15.92 14.882 15.853 14.949C15.787 15.017 15.699 15.074 15.589 15.121C15.479 15.169 15.344 15.192 15.186 15.192Z" fill="currentColor"/></svg>`
-        };
-
-        const navStructure = {
-            model: [
-                { id: 'menu', text: 'Меню', screen: 'screen-model-menu' },
-                { id: 'search', text: 'Поиск', screen: 'screen-model-search' },
-                { id: 'records', text: 'Записи', screen: 'screen-model-records' },
-                { id: 'profile', text: 'Профиль', screen: 'screen-model-profile' }
-            ],
-            master: [
-                { id: 'menu', text: 'Меню', screen: 'screen-master-menu' },
-                { id: 'records', text: 'Слоты', screen: 'screen-master-records' },
-                { id: 'profile', text: 'Профиль', screen: 'screen-master-profile' }
-            ]
-        };
-
-        let currentRole = 'model';
-
-        function renderNav() {
-            const navContainer = document.getElementById('bottom-navigation');
-            const items = navStructure[currentRole];
-            navContainer.querySelectorAll('.nav-item').forEach(el => el.remove());
-            
-            const indicator = document.getElementById('nav-indicator');
-            const itemWidth = 333 / items.length;
-            indicator.style.width = itemWidth + 'px';
-
-            items.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = `nav-item ${index === 0 ? 'active' : ''}`;
-                div.style.width = itemWidth + 'px';
-                div.innerHTML = `${icons[item.id]}<div class="nav-text">${item.text}</div>`;
-                div.onclick = () => { navigate(item.screen); updateNavUI(index, itemWidth); };
-                navContainer.appendChild(div);
-            });
-            updateNavUI(0, itemWidth);
-        }
-
-        function updateNavUI(activeIndex, itemWidth) {
-            document.getElementById('nav-indicator').style.left = (activeIndex * itemWidth) + 'px';
-            document.querySelectorAll('.nav-item').forEach((el, idx) => el.classList.toggle('active', idx === activeIndex));
-        }
-
-        function navigate(screenId) {
-            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            window.scrollTo(0, 0); 
-            
-            const bottomNav = document.getElementById('bottom-navigation');
-            if (screenId.includes('success') || screenId.includes('add')) {
-                bottomNav.style.display = 'none';
-            } else {
-                bottomNav.style.display = 'flex';
-                const screenIndex = navStructure[currentRole].findIndex(i => i.screen === screenId);
-                if (screenIndex !== -1) updateNavUI(screenIndex, 333 / navStructure[currentRole].length);
-            }
-        }
-
-        function switchRole(role) {
-            currentRole = role;
-            renderNav();
-            navigate(role === 'model' ? 'screen-model-menu' : 'screen-master-menu');
-        }
-
-        function switchTabFull(element) {
-            const container = element.parentElement;
-            container.querySelectorAll('.tab-full').forEach(tab => tab.classList.remove('active'));
-            element.classList.add('active');
-        }
-
-        function toggleTag(clickedTag) {
-            document.querySelectorAll('.tag').forEach(tag => tag.classList.remove('active'));
-            clickedTag.classList.add('active');
-        }
-
-        function toggleDetails(btn) {
-            const detailsDiv = btn.nextElementSibling;
-            if (detailsDiv.classList.contains('expanded')) {
-                detailsDiv.classList.remove('expanded');
-                btn.innerText = 'Подробнее';
-            } else {
-                detailsDiv.classList.add('expanded');
-                btn.innerText = 'Меньше';
-            }
-        }
-
-        function toggleDropdown(id) { document.getElementById(id).classList.toggle('active'); }
-        function selectItem(spanId, dropId, name, event) {
-            event.stopPropagation(); 
-            document.getElementById(spanId).innerText = name;
-            document.getElementById(dropId).classList.remove('active');
-        }
-
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        function reviewApplication() {
-            closeModal('modal-reject');
-            document.getElementById('master-application-card').style.display = 'none';
-            const empty = document.getElementById('master-empty-state');
-            empty.style.display = 'block';
-            empty.innerHTML = getSkeleton('Все заявки обработаны.<br>Новые появятся здесь.');
-        }
-
-        function removeRecord() {
-            closeModal('modal-cancel');
-        }
-
-        function initCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-            days.forEach(d => {
-                const el = document.createElement('div');
-                el.className = 'calendar-day-name';
-                el.innerText = d;
-                grid.appendChild(el);
-            });
-            for (let i = 0; i < 2; i++) { grid.appendChild(document.createElement('div')); }
-            for (let i = 1; i <= 31; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day';
-                day.innerText = i;
-                day.onclick = () => {
-                    document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
-                    day.classList.add('selected');
-                };
-                grid.appendChild(day);
-            }
-        }
-
-        document.addEventListener('click', function(event) {
-            const cityDropdown = document.getElementById('city-dropdown');
-            const serviceDropdown = document.getElementById('service-dropdown');
-            if (cityDropdown && !event.target.closest('.input-box')) cityDropdown.classList.remove('active');
-            if (serviceDropdown && !event.target.closest('.input-box')) serviceDropdown.classList.remove('active');
-        });
-
-        const tgUser = (window.Telegram && window.Telegram.WebApp)
-            ? window.Telegram.WebApp.initDataUnsafe?.user
-            : null;
-
-        function getStoredName() {
-            return localStorage.getItem('bb_nickname') || tgUser?.username || tgUser?.first_name || 'Никнейм';
-        }
-
-        function applyTelegramProfile() {
-            const name = getStoredName();
-            document.querySelectorAll('#model-profile-name, #master-profile-name').forEach(el => el.textContent = name);
-
-            const photo = tgUser?.photo_url || '';
-            document.querySelectorAll('[data-avatar]').forEach(el => {
-                if (el.id === 'master-profile-avatar') return;
-                if (photo) {
-                    el.style.backgroundImage = `url("${photo}")`;
-                    el.style.color = "transparent";
-                }
-            });
-
-            const customMaster = localStorage.getItem('bb_master_avatar');
-            const masterAvatar = document.getElementById('master-profile-avatar');
-            if (masterAvatar) {
-                const url = customMaster || photo;
-                if (url) {
-                    masterAvatar.style.backgroundImage = `url("${url}")`;
-                    masterAvatar.style.color = "transparent";
-                }
-            }
-        }
-
-        function setupMasterAvatarUpload() {
-            const avatar = document.getElementById('master-profile-avatar');
-            const input = document.getElementById('master-avatar-upload');
-            if (!avatar || !input) return;
-            avatar.addEventListener('click', () => input.click());
-            input.addEventListener('change', () => {
-                const file = input.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = e => {
-                    localStorage.setItem('bb_master_avatar', e.target.result);
-                    applyTelegramProfile();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function setupEditableNickname() {
-            document.querySelectorAll('#model-profile-name, #master-profile-name').forEach(el => {
-                el.addEventListener('click', () => {
-                    const next = prompt('Введите ваш никнейм:', getStoredName());
-                    if (next && next.trim()) {
-                        localStorage.setItem('bb_nickname', next.trim().replace(/^@/, ''));
-                        applyTelegramProfile();
-                    }
-                });
-            });
-        }
-
-        async function renderRealServices() {
-            const { data: services, error } = await supabaseClient.from('services').select('*').limit(7);
-            const menu = document.getElementById('model-menu-services');
-            
-            if (error || !services?.length) { 
-                if(menu) menu.innerHTML = getSkeleton('Здесь появятся доступные услуги, когда мастера их добавят');
-                return; 
-            }
-
-            const { data: slots } = await supabaseClient.from('slots').select('service_id').eq('status', 'Свободен');
-            const slotCounts = {};
-            if (slots) slots.forEach(s => slotCounts[s.service_id] = (slotCounts[s.service_id] || 0) + 1);
-
-            const tags = document.getElementById('service-tags');
-            if (tags) {
-                tags.innerHTML = '';
-                services.forEach(service => {
-                    const tag = document.createElement('div');
-                    tag.className = 'tag active';
-                    tag.textContent = service.name;
-                    tag.onclick = () => {
-                        document.querySelectorAll('.tag').forEach(x => x.classList.remove('active'));
-                        tag.classList.add('active');
-                        renderSearchResults(service.service_id);
-                    };
-                    tags.appendChild(tag);
-                });
-            }
-
-            if (menu) {
-                menu.innerHTML = '';
-                services.forEach(service => {
-                    const hasSlots = (slotCounts[service.service_id] || 0) > 0;
-                    
-                    const opacityStyle = hasSlots ? '' : 'opacity: 0.5; filter: grayscale(100%);';
-                    
-                    const iconHtml = service.icon_url 
-                        ? `<div class="service-icon" style="background-image: url('${service.icon_url}'); background-size: cover; background-position: center; border: none; color: transparent;"></div>` 
-                        : `<div class="service-icon">услуга</div>`;
-
-                    const card = document.createElement('div');
-                    card.className = 'service-card';
-                    card.style.cssText = opacityStyle;
-                    card.innerHTML = `<div class="service-header"><div class="service-left">${iconHtml}<div class="service-title">${service.name}</div></div></div><button class="btn btn-primary" style="width:150px;float:right;margin-top:-10px;">Выбрать</button><div style="clear:both;"></div>`;
-                    
-                    card.querySelector('button').onclick = () => {
-                        navigate('screen-model-search');
-                        renderSearchResults(service.service_id);
-                    };
-                    menu.appendChild(card);
-                });
-            }
-            if (services.length) await renderSearchResults(services[0].service_id);
-        }
-
-        async function renderSearchResults(serviceId) {
-            const container = document.getElementById('model-search-results');
-            if (!container) return;
-
-            let query = supabaseClient.from('slots').select('*, services(icon_url)').eq('service_id', serviceId).eq('status', 'Свободен');
-            const city = document.getElementById('selected-city')?.textContent;
-            if (city && city !== 'Город') query = query.eq('city', city);
-
-            const { data: slots, error } = await query;
-            if (error || !slots?.length) {
-                container.innerHTML = getSkeleton('Для этой услуги пока нет свободных слотов');
-                return;
-            }
-
-            container.innerHTML = '';
-            slots.forEach(slot => {
-                const card = document.createElement('div');
-                card.className = 'service-card';
-                const dt = slot.date_time ? new Date(slot.date_time) : null;
-                const time = dt && !Number.isNaN(dt.getTime())
-                    ? dt.toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})
-                    : 'дата и время';
-                
-                const iconHtml = slot.services?.icon_url 
-                    ? `<div class="service-icon" style="background-image: url('${slot.services.icon_url}'); background-size: cover; background-position: center; border: none; color: transparent;"></div>` 
-                    : `<div class="service-icon">услуга</div>`;
-
-                card.innerHTML = `<div class="service-header"><div class="service-left">${iconHtml}<div class="service-title"></div></div><div class="service-time"></div></div><button class="btn btn-outline btn-small" style="margin-bottom: 15px;">Подробнее</button><div class="service-details"><div class="details-text address"></div><div class="details-text description"></div></div><button class="btn btn-primary">Записаться</button>`;
-                card.querySelector('.service-title').textContent = slot.service_name || 'Услуга';
-                card.querySelector('.service-time').textContent = time;
-                card.querySelector('.address').textContent = slot.address || slot.city || '';
-                card.querySelector('.description').textContent = slot.description || '';
-                card.querySelector('.btn-outline').onclick = function(){ toggleDetails(this); };
-                card.querySelector('.btn-primary').onclick = () => bookRealSlot(slot);
-                container.appendChild(card);
-            });
-        }
-
-        async function bookRealSlot(slot) {
-            const userId = tgUser?.id;
-            if (!userId) { alert('Откройте приложение через Telegram.'); return; }
-            const { data, error } = await supabaseClient.from('bookings').insert({
-                user_id: userId, slot_id: slot.slot_id, status: 'Ожидает подтверждения мастера'
-            }).select().single();
-            if (error) { alert('Не удалось отправить заявку.'); return; }
-            await supabaseClient.from('slots').update({status:'Ожидает подтверждения'}).eq('slot_id', slot.slot_id);
-            
-            document.getElementById('succ-val-name').innerText = slot.service_name || 'Услуга';
-            const dt = new Date(slot.date_time);
-            document.getElementById('succ-val-date').innerText = dt.toLocaleString('ru-RU', {day:'2-digit', month:'2-digit'});
-            document.getElementById('succ-val-time').innerText = dt.toLocaleString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('succ-val-address').innerText = (slot.address || slot.city || 'Адрес').split('(')[0];
-            
-            navigate('screen-model-success');
-        }
-
-        function setupCityFilter() {
-            const city = document.getElementById('selected-city');
-            if (!city) return;
-            city.parentElement.addEventListener('click', () => {
-                setTimeout(() => {
-                    const selected = city.textContent;
-                    if (selected && selected !== 'Город') {
-                        const active = document.querySelector('.tag.active');
-                        if (active) {
-                            const services = document.querySelectorAll('#service-tags .tag');
-                            const index = Array.from(services).indexOf(active);
-                            if (index >= 0) active.click();
-                        }
-                    }
-                }, 0);
-            });
-        }
-
-        async function createRealSlot() {
-            const userId = tgUser?.id;
-            if (!userId) { alert('Откройте приложение через Telegram.'); return; }
-
-            const serviceName = document.getElementById('selected-service')?.textContent?.trim();
-            const service = (await supabaseClient.from('services').select('service_id').eq('name', serviceName).limit(1).maybeSingle()).data;
-            if (!service?.service_id) { alert('Выберите услугу.'); return; }
-
-            const city = document.getElementById('slot-city-input')?.value || '';
-            const address = document.getElementById('slot-address-input')?.value?.trim() || '';
-            const description = document.getElementById('slot-description-input')?.value?.trim() || '';
-            const selectedDay = document.querySelector('.calendar-day.selected')?.textContent;
-            
-            if (!selectedDay) { alert('Выберите дату в календаре.'); return; }
-
-            const dt = new Date(2026, 7, Number(selectedDay), 12, 0, 0);
-            const { error } = await supabaseClient.from('slots').insert({
-                master_id: userId, service_id: service.service_id, date_time: dt.toISOString(),
-                status: 'Свободен', city, address, description
-            });
-
-            if (error) { alert('Не удалось создать слот.'); return; }
-            navigate('screen-master-success');
-        }
-
-        async function renderMasterApplications() {
-            const card = document.getElementById('master-application-card');
-            const empty = document.getElementById('master-empty-state');
-            if (!card || !empty || !tgUser?.id) return;
-
-            const {data: bookings, error} = await supabaseClient.from('bookings').select('booking_id,slot_id,user_id,status').eq('status','Ожидает подтверждения мастера');
-            if (error || !bookings?.length) {
-                card.style.display = 'none';
-                empty.style.display = 'block';
-                empty.innerHTML = getSkeleton('Все заявки обработаны.<br>Новые появятся здесь.');
-                return;
-            }
-
-            const rows=[];
-            for (const b of bookings) {
-                const {data:s} = await supabaseClient.from('slots').select('service_id,date_time,master_id').eq('slot_id',b.slot_id).maybeSingle();
-                if (s?.master_id === tgUser.id) rows.push({...b,slot:s});
-            }
-
-            if (!rows.length) {
-                card.style.display = 'none';
-                empty.style.display = 'block';
-                empty.innerHTML = getSkeleton('Все заявки обработаны.<br>Новые появятся здесь.');
-                return;
-            }
-
-            const b=rows[0];
-            const {data:service}=await supabaseClient.from('services').select('name, icon_url').eq('service_id',b.slot.service_id).maybeSingle();
-            card.style.display='block';
-            empty.style.display='none';
-            card.querySelector('.service-title').textContent=service?.name || 'Услуга';
-            
-            if(service?.icon_url) {
-                card.querySelector('.service-icon').style.backgroundImage = `url('${service.icon_url}')`;
-                card.querySelector('.service-icon').style.backgroundSize = 'cover';
-                card.querySelector('.service-icon').style.color = 'transparent';
-            }
-
-            const dt=new Date(b.slot.date_time);
-            card.querySelector('.service-time').textContent=dt.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-        }
-
-        async function renderModelRecords() {
-            const screen = document.getElementById('model-records-list');
-            if (!screen || !tgUser?.id) return;
-
-            const {data:bookings,error}=await supabaseClient.from('bookings').select('booking_id,slot_id,status').eq('user_id',tgUser.id);
-            if (error || !bookings?.length) { 
-                screen.innerHTML = getSkeleton('У вас пока нет записей. Найдите подходящую услугу и запишитесь!'); 
-                return; 
-            }
-
-            screen.innerHTML='';
-            for (const b of bookings) {
-                const {data:s}=await supabaseClient.from('slots').select('service_id,date_time').eq('slot_id',b.slot_id).maybeSingle();
-                if (!s) continue;
-                const {data:service}=await supabaseClient.from('services').select('name, icon_url').eq('service_id',s.service_id).maybeSingle();
-                const dt=new Date(s.date_time);
-                
-                const iconHtml = service?.icon_url 
-                    ? `<div class="service-icon" style="background-image: url('${service.icon_url}'); background-size: cover; background-position: center; border: none; color: transparent;"></div>` 
-                    : `<div class="service-icon">услуга</div>`;
-
-                const card=document.createElement('div');
-                card.className='service-card record-card';
-                card.innerHTML=`<div class="service-header"><div class="service-left">${iconHtml}<div class="service-title"></div></div><div class="service-time"></div></div><div class="service-status"></div><button class="btn btn-outline btn-small record-cancel">Отменить</button><button class="btn btn-primary">Связаться с мастером</button>`;
-                card.querySelector('.service-title').textContent=service?.name || 'Услуга';
-                card.querySelector('.service-time').textContent=dt.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-                card.querySelector('.service-status').textContent='статус: '+b.status;
-                screen.appendChild(card);
-            }
-        }
-
-        async function renderMasterRecords() {
-            const screen = document.getElementById('master-records-list');
-            if (!screen || !tgUser?.id) return;
-
-            const {data:slots, error} = await supabaseClient.from('slots').select('*').eq('master_id', tgUser.id);
-            if (error || !slots?.length) { 
-                screen.innerHTML = getSkeleton('Вы еще не создали ни одного слота.<br>Самое время добавить первый!'); 
-                return; 
-            }
-
-            screen.innerHTML='';
-            for (const s of slots) {
-                const {data:service}=await supabaseClient.from('services').select('name, icon_url').eq('service_id',s.service_id).maybeSingle();
-                const dt=new Date(s.date_time);
-                
-                const iconHtml = service?.icon_url 
-                    ? `<div class="service-icon" style="background-image: url('${service.icon_url}'); background-size: cover; background-position: center; border: none; color: transparent;"></div>` 
-                    : `<div class="service-icon">услуга</div>`;
-
-                const card=document.createElement('div');
-                card.className='service-card record-card';
-                card.innerHTML=`<div class="service-header"><div class="service-left">${iconHtml}<div class="service-title"></div></div><div class="service-time"></div></div><div class="service-status"></div>`;
-                card.querySelector('.service-title').textContent=service?.name || 'Услуга';
-                card.querySelector('.service-time').textContent=dt.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-                card.querySelector('.service-status').textContent='статус: '+s.status;
-                screen.appendChild(card);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            applyTelegramProfile();
-            setupMasterAvatarUpload();
-            setupEditableNickname();
-            setupCityFilter();
-            renderRealServices();
-            renderMasterApplications();
-            renderModelRecords();
-            renderMasterRecords();
-        });
-
-        renderNav();
-        initCalendar();
-        if (window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.expand();
-    </script>
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/services.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
