@@ -1,13 +1,7 @@
 import { supabase } from './supabase.js';
 
-
-export async function getAvailableSlots(
-    serviceId,
-    city = null
-) {
-    if (!serviceId) {
-        return [];
-    }
+export async function getAvailableSlots(serviceId, city = null, userId = null) {
+    if (!serviceId) return [];
 
     let query = supabase
         .from('slots')
@@ -23,34 +17,37 @@ export async function getAvailableSlots(
         .eq('status', 'Свободен')
         .order('date_time');
 
-
     if (city && city !== 'Город') {
-        query = query.eq(
-            'city',
-            city
+        query = query.eq('city', city);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    let slots = data || [];
+
+    if (userId && slots.length) {
+        const { data: rejected, error: rejectedError } = await supabase
+            .from('bookings')
+            .select('slot_id')
+            .eq('user_id', userId)
+            .eq('status', 'Отменена мастером')
+            .eq('reason', 'model');
+
+        if (rejectedError) throw rejectedError;
+
+        const hiddenSlotIds = new Set(
+            (rejected || []).map((row) => row.slot_id)
         );
+
+        slots = slots.filter((slot) => !hiddenSlotIds.has(slot.slot_id));
     }
 
-
-    const { data, error } =
-        await query;
-
-
-    if (error) {
-        throw error;
-    }
-
-    return data || [];
+    return slots.filter((slot) => new Date(slot.date_time) > new Date());
 }
 
-
-export async function getSlot(
-    slotId
-) {
-    if (!slotId) {
-        return null;
-    }
-
+export async function getSlot(slotId) {
     const { data, error } = await supabase
         .from('slots')
         .select(`
@@ -65,21 +62,11 @@ export async function getSlot(
         .limit(1)
         .maybeSingle();
 
-    if (error) {
-        throw error;
-    }
-
+    if (error) throw error;
     return data;
 }
 
-
-export async function getMasterSlots(
-    masterId
-) {
-    if (!masterId) {
-        return [];
-    }
-
+export async function getMasterSlots(masterId) {
     const { data, error } = await supabase
         .from('slots')
         .select(`
@@ -93,148 +80,94 @@ export async function getMasterSlots(
         .eq('master_id', masterId)
         .order('date_time');
 
-    if (error) {
-        throw error;
-    }
-
+    if (error) throw error;
     return data || [];
 }
 
-
-export async function getMasterActiveSlots(
-    masterId
-) {
-    if (!masterId) {
-        return [];
+export async function createSlot({ masterId, serviceId, dateTime, city, address = '', description = '' }) {
+    if (!masterId || !serviceId || !dateTime || !city) {
+        throw new Error('Заполните услугу, город, дату и время.');
     }
 
     const { data, error } = await supabase
         .from('slots')
-        .select(`
-            *,
-            services (
-                service_id,
-                name,
-                icon_url
-            )
-        `)
+        .insert({
+            master_id: masterId,
+            service_id: serviceId,
+            date_time: dateTime,
+            status: 'Свободен',
+            city,
+            address,
+            description
+        })
+        .select()
+        .single();
+
+    if (error) {
+        if (error.code === '23505') {
+            throw new Error('Слот на это время уже существует.');
+        }
+        throw error;
+    }
+
+    return data;
+}
+
+export async function deleteSlot(slotId, masterId) {
+    const { error } = await supabase
+        .from('slots')
+        .delete()
+        .eq('slot_id', slotId)
         .eq('master_id', masterId)
-        .in(
-            'status',
-            [
-                'Свободен',
-                'Ожидает подтверждения',
-                'Занят'
-            ]
-        )
-        .order('date_time');
+        .eq('status', 'Свободен');
 
-    if (error) {
-        throw error;
-    }
-
-    return data || [];
+    if (error) throw error;
 }
 
+export async function cancelSlot(slotId, masterId) {
+    const slot = await getSlot(slotId);
 
-export async function createSlot({
-    masterId,
-    serviceId,
-    dateTime,
-    city = '',
-    address = '',
-    description = ''
-}) {
-    if (!masterId) {
-        throw new Error('Master ID is required.');
+    if (!slot || slot.master_id !== masterId) {
+        throw new Error('Слот не найден.');
     }
 
-    if (!serviceId) {
-        throw new Error('Service ID is required.');
+    const { data: booking, error } = await supabase
+        .from('bookings')
+        .select('booking_id,status')
+        .eq('slot_id', slotId)
+        .in('status', [
+            'Ожидает подтверждения мастера',
+            'Активна'
+        ])
+        .limit(1)
+        .maybeSingle();
+
+    if (error) throw error;
+
+    if (!booking) {
+        await deleteSlot(slotId, masterId);
+        return { deleted: true };
     }
 
-    if (!dateTime) {
-        throw new Error('Date and time are required.');
-    }
+    const { data, error: bookingError } = await supabase
+        .from('bookings')
+        .update({
+            status: 'Отменена мастером',
+            reason: 'plans'
+        })
+        .eq('booking_id', booking.booking_id)
+        .select()
+        .single();
 
+    if (bookingError) throw bookingError;
 
-    const { data: existingSlot, error: existingError } =
-        await supabase
-            .from('slots')
-            .select('slot_id')
-            .eq('master_id', masterId)
-            .eq('date_time', dateTime)
-            .limit(1)
-            .maybeSingle();
+    const { error: slotError } = await supabase
+        .from('slots')
+        .update({ status: 'Отменен' })
+        .eq('slot_id', slotId)
+        .eq('master_id', masterId);
 
+    if (slotError) throw slotError;
 
-    if (existingError) {
-        throw existingError;
-    }
-
-
-    if (existingSlot) {
-        throw new Error(
-            'Слот на это время уже существует.'
-        );
-    }
-
-
-    const { data, error } =
-        await supabase
-            .from('slots')
-            .insert({
-                master_id: masterId,
-                service_id: serviceId,
-                date_time: dateTime,
-                status: 'Свободен',
-                city,
-                address,
-                description
-            })
-            .select()
-            .single();
-
-
-    if (error) {
-        throw error;
-    }
-
-    return data;
-}
-
-
-export async function updateSlotStatus(
-    slotId,
-    status
-) {
-    if (!slotId) {
-        throw new Error('Slot ID is required.');
-    }
-
-    const { data, error } =
-        await supabase
-            .from('slots')
-            .update({
-                status
-            })
-            .eq('slot_id', slotId)
-            .select()
-            .single();
-
-    if (error) {
-        throw error;
-    }
-
-    return data;
-}
-
-
-export async function cancelSlot(
-    slotId
-) {
-    return updateSlotStatus(
-        slotId,
-        'Отменен'
-    );
+    return { deleted: false, booking: data };
 }

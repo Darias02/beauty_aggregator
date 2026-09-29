@@ -1,5 +1,6 @@
 import {
-    getServices
+    getServices,
+    getAvailableCities
 } from '../../data/services.js';
 
 import {
@@ -289,7 +290,8 @@ export async function renderSearchResults() {
         const slots =
             await getAvailableSlots(
                 selectedService.service_id,
-                city
+                city,
+                getTelegramUserId()
             );
 
 
@@ -634,6 +636,51 @@ function fillSuccessScreen(
 }
 
 
+async function loadCities() {
+    const dropdown = document.getElementById('city-dropdown');
+    if (!dropdown) return;
+
+    dropdown.innerHTML = '<div class="dropdown-item">Загрузка...</div>';
+
+    try {
+        const cities = await getAvailableCities();
+        dropdown.innerHTML = '';
+
+        const all = document.createElement('div');
+        all.className = 'dropdown-item';
+        all.textContent = 'Все города';
+        all.addEventListener('click', (event) => {
+            event.stopPropagation();
+            document.getElementById('selected-city').textContent = 'Город';
+            setSelectedCity(null);
+            dropdown.classList.remove('active');
+            renderSearchResults();
+        });
+        dropdown.appendChild(all);
+
+        cities.forEach((city) => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            item.textContent = city;
+            item.addEventListener('click', (event) => {
+                event.stopPropagation();
+                document.getElementById('selected-city').textContent = city;
+                setSelectedCity(city);
+                dropdown.classList.remove('active');
+                renderSearchResults();
+            });
+            dropdown.appendChild(item);
+        });
+
+        if (!cities.length) {
+            dropdown.innerHTML = '<div class="dropdown-item">Городов пока нет</div>';
+        }
+    } catch (error) {
+        console.error('Cities loading error:', error);
+        dropdown.innerHTML = '<div class="dropdown-item">Не удалось загрузить города</div>';
+    }
+}
+
 export function initModelSearch() {
     if (initialized) {
         return;
@@ -673,4 +720,5 @@ export function initModelSearch() {
 
 
     loadSearchServices();
+    loadCities();
 }

@@ -1,0 +1,5 @@
+[functions.notify-master]
+verify_jwt = false
+
+[functions.notify-user]
+verify_jwt = false

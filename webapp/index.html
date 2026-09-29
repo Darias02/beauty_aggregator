@@ -50,7 +50,8 @@
         <div class="tags-container" id="service-tags"></div>
 
         <div
-            class="input-box"
+            class="input-box city-filter"
+            onclick="window.toggleDropdown('city-dropdown')"
             style="
                 border: none;
                 padding: 0;
@@ -87,35 +88,7 @@
                 class="dropdown-menu"
                 id="city-dropdown"
                 style="width: 250px;"
-            >
-                <div
-                    class="dropdown-item"
-                    onclick="
-                        window.selectItem(
-                            'selected-city',
-                            'city-dropdown',
-                            'Москва',
-                            event
-                        )
-                    "
-                >
-                    Москва
-                </div>
-
-                <div
-                    class="dropdown-item"
-                    onclick="
-                        window.selectItem(
-                            'selected-city',
-                            'city-dropdown',
-                            'Санкт-Петербург',
-                            event
-                        )
-                    "
-                >
-                    Санкт-Петербург
-                </div>
-            </div>
+            ></div>
         </div>
 
         <div id="model-search-results"></div>
@@ -406,11 +379,23 @@
                     font-family:'Inter';
                     font-size:15px;
                 "
-                onclick="
-                    window.switchRole('master')
-                "
+                onclick="window.switchRole('master')"
             >
                 <span>Стать мастером</span>
+            </button>
+
+            <button
+                class="btn support-button"
+                style="
+                    border-radius:13px;
+                    padding:15px;
+                    font-family:'Inter';
+                    font-size:15px;
+                    background:var(--card-bg);
+                "
+                type="button"
+            >
+                Написать в поддержку
             </button>
 
         </div>
@@ -552,47 +537,7 @@
                 id="service-dropdown"
             >
 
-                <div
-                    class="dropdown-item"
-                    onclick="
-                        window.selectItem(
-                            'selected-service',
-                            'service-dropdown',
-                            'Маникюр',
-                            event
-                        )
-                    "
-                >
-                    Маникюр
-                </div>
-
-                <div
-                    class="dropdown-item"
-                    onclick="
-                        window.selectItem(
-                            'selected-service',
-                            'service-dropdown',
-                            'Педикюр',
-                            event
-                        )
-                    "
-                >
-                    Педикюр
-                </div>
-
-                <div
-                    class="dropdown-item"
-                    onclick="
-                        window.selectItem(
-                            'selected-service',
-                            'service-dropdown',
-                            'Брови',
-                            event
-                        )
-                    "
-                >
-                    Брови
-                </div>
+                <div class="dropdown-item">Загрузка...</div>
 
             </div>
         </div>
@@ -601,17 +546,14 @@
 
             <span>Город</span>
 
-            <select id="slot-city-input">
+            <input
+                id="slot-city-input"
+                list="slot-city-list"
+                type="text"
+                placeholder="Введите город"
+            >
 
-                <option value="Москва">
-                    Москва
-                </option>
-
-                <option value="Санкт-Петербург">
-                    Санкт-Петербург
-                </option>
-
-            </select>
+            <datalist id="slot-city-list"></datalist>
 
         </label>
 
@@ -684,9 +626,8 @@
                 font-size:22px;
                 padding:15px;
             "
-            onclick="
-                window.createRealSlot()
-            "
+            class="btn btn-primary publish-slot-button"
+            onclick="window.createRealSlot()"
         >
             Опубликовать слот
         </button>
@@ -755,6 +696,14 @@
 
         </div>
 
+        <input
+            id="master-address-input"
+            class="profile-address-input"
+            type="text"
+            placeholder="Адрес предоставления услуг"
+            autocomplete="street-address"
+        >
+
         <div class="profile-bottom-actions">
 
             <button
@@ -766,11 +715,23 @@
                     font-family:'Inter';
                     font-size:15px;
                 "
-                onclick="
-                    window.switchRole('model')
-                "
+                onclick="window.switchRole('model')"
             >
                 <span>Стать моделью</span>
+            </button>
+
+            <button
+                class="btn support-button"
+                style="
+                    border-radius:13px;
+                    padding:15px;
+                    font-family:'Inter';
+                    font-size:15px;
+                    background:var(--card-bg);
+                "
+                type="button"
+            >
+                Написать в поддержку
             </button>
 
         </div>

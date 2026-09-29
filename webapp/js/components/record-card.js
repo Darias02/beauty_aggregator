@@ -1,7 +1,4 @@
-import {
-    hapticImpact
-} from '../telegram.js';
-
+import { hapticImpact } from '../telegram.js';
 
 function escapeHtml(value) {
     return String(value ?? '')
@@ -12,464 +9,143 @@ function escapeHtml(value) {
         .replaceAll("'", '&#039;');
 }
 
+function formatDateTime(value) {
+    const date = new Date(value);
 
-function formatDateTime(
-    value
-) {
-    if (!value) {
-        return {
-            date: '',
-            time: ''
-        };
+    if (Number.isNaN(date.getTime())) {
+        return { date: String(value || ''), time: '' };
     }
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-        return {
-            date: String(value),
-            time: ''
-        };
-    }
-
 
     return {
-        date: date.toLocaleDateString(
-            'ru-RU',
-            {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            }
-        ),
-
-        time: date.toLocaleTimeString(
-            'ru-RU',
-            {
-                hour: '2-digit',
-                minute: '2-digit'
-            }
-        )
+        date: date.toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }),
+        time: date.toLocaleTimeString('ru-RU', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })
     };
 }
 
-
-function getStatusText(
-    record
-) {
-    return (
-        record?.status ||
-        record?.slots?.status ||
-        'Статус не указан'
-    );
-}
-
-
-function getServiceName(
-    record
-) {
-    return (
-        record?.slot?.services?.name ||
-        record?.slots?.services?.name ||
-        record?.services?.name ||
-        record?.service_name ||
-        'Услуга'
-    );
-}
-
-
 function getSlot(record) {
-    return (
-        record?.slot ||
-        record?.slots ||
-        record
-    );
+    return record?.slot || record?.slots || record;
 }
 
+function getServiceName(record) {
+    const slot = getSlot(record);
+    return slot?.services?.name || record?.services?.name || 'Услуга';
+}
 
 export function createRecordCard({
     record,
-    role = 'model',
+    role,
     onCancel = null,
+    onDelete = null,
     onApprove = null,
     onReject = null,
     onContact = null
 }) {
-    const card =
-        document.createElement('div');
+    const card = document.createElement('div');
+    card.className = 'service-card record-card';
 
-    card.className =
-        'service-card record-card';
-
-
-    const slot =
-        getSlot(record);
-
-
-    const {
-        date,
-        time
-    } = formatDateTime(
-        slot?.date_time
-    );
-
-
-    const serviceName =
-        getServiceName(
-            record
-        );
-
-
-    const status =
-        getStatusText(
-            record
-        );
-
-
-    const city =
-        slot?.city || '';
-
-
-    const address =
-        slot?.address || '';
-
-
-    const description =
-        slot?.description || '';
-
+    const slot = getSlot(record);
+    const { date, time } = formatDateTime(slot?.date_time);
+    const status = record?.status || 'Статус не указан';
 
     card.innerHTML = `
         <div class="service-header">
-
             <div class="service-left">
-
-                <div class="service-icon">
-                    BB
+                <div class="service-icon">картинка<br>услуги</div>
+                <div class="record-main-info">
+                    <div class="service-title">${escapeHtml(getServiceName(record))}</div>
+                    <div class="service-time">${escapeHtml(date)} · ${escapeHtml(time)}</div>
                 </div>
-
-                <div>
-
-                    <div class="service-title">
-                        ${escapeHtml(serviceName)}
-                    </div>
-
-                    <div class="service-time">
-                        ${escapeHtml(date)}
-                        ${time
-                            ? ` · ${escapeHtml(time)}`
-                            : ''
-                        }
-                    </div>
-
-                </div>
-
             </div>
-
         </div>
 
-        <div class="service-status">
-            ${escapeHtml(status)}
-        </div>
+        <div class="service-status">статус: ${escapeHtml(status)}</div>
 
-        ${
-            city
-                ? `
-                    <div class="details-text">
-                        Город: ${escapeHtml(city)}
-                    </div>
-                `
-                : ''
-        }
-
-        ${
-            address
-                ? `
-                    <div class="details-text">
-                        Адрес: ${escapeHtml(address)}
-                    </div>
-                `
-                : ''
-        }
-
-        ${
-            description
-                ? `
-                    <div class="details-text">
-                        ${escapeHtml(description)}
-                    </div>
-                `
-                : ''
-        }
+        ${slot?.city ? `<div class="details-text">Город: ${escapeHtml(slot.city)}</div>` : ''}
+        ${slot?.address ? `<div class="details-text">Адрес: ${escapeHtml(slot.address)}</div>` : ''}
+        ${slot?.description ? `<div class="details-text">${escapeHtml(slot.description)}</div>` : ''}
 
         <div class="btn-action-group"></div>
     `;
 
-
-    const actionGroup =
-        card.querySelector(
-            '.btn-action-group'
-        );
-
+    const actionGroup = card.querySelector('.btn-action-group');
 
     if (role === 'model') {
-        if (
-            typeof onCancel ===
-            'function' &&
-            (
-                status === 'Активна' ||
-                status ===
-                    'Ожидает подтверждения мастера'
-            )
-        ) {
-            const cancelButton =
-                document.createElement(
-                    'button'
-                );
-
-            cancelButton.className =
-                'btn-reject record-cancel';
-
-            cancelButton.type =
-                'button';
-
-            cancelButton.textContent =
-                'Отменить';
-
-
-            cancelButton.addEventListener(
-                'click',
-                (event) => {
-                    event.stopPropagation();
-                    hapticImpact('light');
-                    onCancel(record);
-                }
-            );
-
-
-            card.appendChild(
-                cancelButton
-            );
+        if (typeof onCancel === 'function' && ['Активна', 'Ожидает подтверждения мастера'].includes(status)) {
+            const button = document.createElement('button');
+            button.className = 'btn-reject record-cancel';
+            button.type = 'button';
+            button.textContent = 'Отменить';
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                hapticImpact('light');
+                onCancel(record);
+            });
+            card.appendChild(button);
         }
 
-
-        if (
-            typeof onContact ===
-            'function' &&
-            status === 'Активна'
-        ) {
-            const contactButton =
-                document.createElement(
-                    'button'
-                );
-
-            contactButton.className =
-                'btn-approve';
-
-            contactButton.type =
-                'button';
-
-            contactButton.textContent =
-                'Связаться с мастером';
-
-
-            contactButton.addEventListener(
-                'click',
-                () => {
-                    hapticImpact('light');
-                    onContact(record);
-                }
-            );
-
-
-            actionGroup.appendChild(
-                contactButton
-            );
+        if (typeof onContact === 'function' && status === 'Активна') {
+            const button = document.createElement('button');
+            button.className = 'btn-approve record-contact';
+            button.type = 'button';
+            button.textContent = 'Связаться с мастером';
+            button.addEventListener('click', () => onContact(record));
+            actionGroup.appendChild(button);
         }
     }
-
 
     if (role === 'master') {
-        if (
-            typeof onApprove ===
-                'function' &&
-            status ===
-                'Ожидает подтверждения мастера'
-        ) {
-            const approveButton =
-                document.createElement(
-                    'button'
-                );
-
-            approveButton.className =
-                'btn-approve';
-
-            approveButton.type =
-                'button';
-
-            approveButton.textContent =
-                'Подтвердить';
-
-
-            approveButton.addEventListener(
-                'click',
-                (event) => {
-                    event.stopPropagation();
-                    hapticImpact('medium');
-                    onApprove(record);
-                }
-            );
-
-
-            actionGroup.appendChild(
-                approveButton
-            );
+        if (typeof onApprove === 'function' && status === 'Ожидает подтверждения мастера') {
+            const button = document.createElement('button');
+            button.className = 'btn-approve';
+            button.type = 'button';
+            button.textContent = 'Подтвердить';
+            button.addEventListener('click', () => onApprove(record));
+            actionGroup.appendChild(button);
         }
 
-
-        if (
-            typeof onReject ===
-                'function' &&
-            status ===
-                'Ожидает подтверждения мастера'
-        ) {
-            const rejectButton =
-                document.createElement(
-                    'button'
-                );
-
-            rejectButton.className =
-                'btn-reject';
-
-            rejectButton.type =
-                'button';
-
-            rejectButton.textContent =
-                'Отклонить';
-
-
-            rejectButton.addEventListener(
-                'click',
-                (event) => {
-                    event.stopPropagation();
-                    hapticImpact('light');
-                    onReject(record);
-                }
-            );
-
-
-            actionGroup.appendChild(
-                rejectButton
-            );
+        if (typeof onReject === 'function' && status === 'Ожидает подтверждения мастера') {
+            const button = document.createElement('button');
+            button.className = 'btn-reject';
+            button.type = 'button';
+            button.textContent = 'Отклонить';
+            button.addEventListener('click', () => onReject(record));
+            actionGroup.appendChild(button);
         }
 
+        if (typeof onContact === 'function' && status === 'Активна') {
+            const button = document.createElement('button');
+            button.className = 'btn-approve record-contact';
+            button.type = 'button';
+            button.textContent = 'Связаться с моделью';
+            button.addEventListener('click', () => onContact(record));
+            actionGroup.appendChild(button);
+        }
 
-        if (
-            typeof onContact ===
-                'function' &&
-            (
-                status === 'Активна' ||
-                status === 'Занят'
-            )
-        ) {
-            const contactButton =
-                document.createElement(
-                    'button'
-                );
+        if (typeof onDelete === 'function') {
+            const button = document.createElement('button');
+            button.className = 'btn-reject';
+            button.type = 'button';
+            button.textContent = 'Удалить слот';
+            button.addEventListener('click', () => onDelete(record));
+            actionGroup.appendChild(button);
+        }
 
-            contactButton.className =
-                'btn-approve';
-
-            contactButton.type =
-                'button';
-
-            contactButton.textContent =
-                'Связаться с моделью';
-
-
-            contactButton.addEventListener(
-                'click',
-                () => {
-                    hapticImpact('light');
-                    onContact(record);
-                }
-            );
-
-
-            actionGroup.appendChild(
-                contactButton
-            );
+        if (typeof onCancel === 'function') {
+            const button = document.createElement('button');
+            button.className = 'btn-reject';
+            button.type = 'button';
+            button.textContent = 'Отменить слот';
+            button.addEventListener('click', () => onCancel(record));
+            actionGroup.appendChild(button);
         }
     }
-
 
     return card;
-}
-
-
-export function renderRecordCards({
-    container,
-    records,
-    role,
-    onCancel,
-    onApprove,
-    onReject,
-    onContact
-}) {
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML = '';
-
-
-    if (!records?.length) {
-        const empty =
-            document.createElement(
-                'div'
-            );
-
-        empty.className =
-            'skeleton-card service-card';
-
-
-        empty.innerHTML = `
-            <div class="skeleton-text">
-                На данный момент<br>
-                нет записей
-            </div>
-        `;
-
-
-        container.appendChild(
-            empty
-        );
-
-        return;
-    }
-
-
-    records.forEach(
-        (record) => {
-            const card =
-                createRecordCard({
-                    record,
-                    role,
-                    onCancel,
-                    onApprove,
-                    onReject,
-                    onContact
-                });
-
-
-            container.appendChild(card);
-        }
-    );
 }
