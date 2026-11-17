@@ -625,3 +625,39 @@ def test_preview_config_aliases(server, request):
         with pytest.raises(HTTPError) as error:
             urlopen(server + path)
         assert error.value.code == 404
+
+
+@pytest.mark.parametrize('width', [320, 360, 390, 430, 1280])
+def test_updated_layout_geometry(ui, width):
+    page, api = ui
+    page.set_viewport_size({'width': width, 'height': 844})
+    nav = page.locator('#bottom-navigation')
+    expect(nav.locator('button svg')).to_have_count(4)
+    page.get_by_role('button', name='Профиль', exact=True).click()
+    profile = page.locator('#screen-model-profile')
+    actions = profile.locator('.profile-action-btn')
+    expect(actions).to_have_count(2)
+    page.wait_for_timeout(350)
+    boxes = [action.bounding_box() for action in actions.all()]
+    assert abs(boxes[0]['width'] - boxes[1]['width']) < 1
+    assert boxes[0]['y'] == boxes[1]['y']
+    actions.filter(has_text='Мои записи').click()
+    page.wait_for_timeout(350)
+    panel = page.locator('#screen-model-records .records-top-panel').bounding_box()
+    assert abs(panel['y']) < 1
+    assert abs(panel['width'] - min(width, 430)) < 1
+    assert abs(panel['x'] - max(0, (width - 430) / 2)) < 1
+    page.locator('#screen-model-records .tab-full').filter(has_text='Архив').click()
+    expect(page.locator('#screen-model-records .tab-full.active')).to_have_text('Архив')
+    api.pending()
+    master(page)
+    create = page.get_by_role('button', name='Создать новый слот', exact=True)
+    assert create.evaluate('(b)=>b.scrollWidth <= b.clientWidth')
+    navigate(page, 'screen-master-records')
+    card = page.locator('.screen.active .record-card').first
+    expect(card).to_be_visible()
+    assert card.evaluate('''c => [...c.querySelectorAll('button, .details-text, .service-status')].every(e => {
+        const r = e.getBoundingClientRect(), b = c.getBoundingClientRect();
+        return r.left >= b.left && r.right <= b.right && r.bottom <= b.bottom;
+    })''')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
