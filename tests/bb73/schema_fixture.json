@@ -1,0 +1,296 @@
+{
+  "functions": [],
+  "history_relation": null,
+  "columns": [
+    {
+      "type": "bigint",
+      "attname": "booking_id",
+      "relname": "bookings",
+      "attnotnull": true,
+      "attidentity": "d",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "user_id",
+      "relname": "bookings",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "slot_id",
+      "relname": "bookings",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "status",
+      "relname": "bookings",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": "'confirmed'::text"
+    },
+    {
+      "type": "text",
+      "attname": "reason",
+      "relname": "bookings",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "master_id",
+      "relname": "masters",
+      "attnotnull": true,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "name",
+      "relname": "masters",
+      "attnotnull": true,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "phone_number",
+      "relname": "masters",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "address",
+      "relname": "masters",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "avatar_url",
+      "relname": "masters",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "service_id",
+      "relname": "services",
+      "attnotnull": true,
+      "attidentity": "d",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "name",
+      "relname": "services",
+      "attnotnull": true,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "description",
+      "relname": "services",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "slot_id",
+      "relname": "slots",
+      "attnotnull": true,
+      "attidentity": "d",
+      "default_expression": null
+    },
+    {
+      "type": "timestamp with time zone",
+      "attname": "date_time",
+      "relname": "slots",
+      "attnotnull": true,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "status",
+      "relname": "slots",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": "'available'::text"
+    },
+    {
+      "type": "bigint",
+      "attname": "master_id",
+      "relname": "slots",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "service_id",
+      "relname": "slots",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "city",
+      "relname": "slots",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "address",
+      "relname": "slots",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "description",
+      "relname": "slots",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "bigint",
+      "attname": "user_id",
+      "relname": "users",
+      "attnotnull": true,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "name",
+      "relname": "users",
+      "attnotnull": true,
+      "attidentity": "",
+      "default_expression": null
+    },
+    {
+      "type": "text",
+      "attname": "phone_number",
+      "relname": "users",
+      "attnotnull": false,
+      "attidentity": "",
+      "default_expression": null
+    }
+  ],
+  "constraints": [
+    {
+      "conname": "bookings_pkey",
+      "contype": "p",
+      "relation": "bookings",
+      "definition": "PRIMARY KEY (booking_id)"
+    },
+    {
+      "conname": "bookings_slot_id_fkey",
+      "contype": "f",
+      "relation": "bookings",
+      "definition": "FOREIGN KEY (slot_id) REFERENCES slots(slot_id) ON DELETE CASCADE"
+    },
+    {
+      "conname": "bookings_user_id_fkey",
+      "contype": "f",
+      "relation": "bookings",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE"
+    },
+    {
+      "conname": "masters_pkey",
+      "contype": "p",
+      "relation": "masters",
+      "definition": "PRIMARY KEY (master_id)"
+    },
+    {
+      "conname": "services_pkey",
+      "contype": "p",
+      "relation": "services",
+      "definition": "PRIMARY KEY (service_id)"
+    },
+    {
+      "conname": "slots_master_id_fkey",
+      "contype": "f",
+      "relation": "slots",
+      "definition": "FOREIGN KEY (master_id) REFERENCES masters(master_id) ON DELETE CASCADE"
+    },
+    {
+      "conname": "slots_pkey",
+      "contype": "p",
+      "relation": "slots",
+      "definition": "PRIMARY KEY (slot_id)"
+    },
+    {
+      "conname": "slots_service_id_fkey",
+      "contype": "f",
+      "relation": "slots",
+      "definition": "FOREIGN KEY (service_id) REFERENCES services(service_id) ON DELETE CASCADE"
+    },
+    {
+      "conname": "users_pkey",
+      "contype": "p",
+      "relation": "users",
+      "definition": "PRIMARY KEY (user_id)"
+    }
+  ],
+  "indexes": [
+    {
+      "index_name": "bookings_one_live_booking_per_slot",
+      "definition": "CREATE UNIQUE INDEX bookings_one_live_booking_per_slot ON public.bookings USING btree (slot_id) WHERE (status = ANY (ARRAY['Ожидает подтверждения мастера'::text, 'Активна'::text]))"
+    },
+    {
+      "index_name": "bookings_pkey",
+      "definition": "CREATE UNIQUE INDEX bookings_pkey ON public.bookings USING btree (booking_id)"
+    },
+    {
+      "index_name": "bookings_user_idx",
+      "definition": "CREATE INDEX bookings_user_idx ON public.bookings USING btree (user_id)"
+    },
+    {
+      "index_name": "masters_pkey",
+      "definition": "CREATE UNIQUE INDEX masters_pkey ON public.masters USING btree (master_id)"
+    },
+    {
+      "index_name": "services_pkey",
+      "definition": "CREATE UNIQUE INDEX services_pkey ON public.services USING btree (service_id)"
+    },
+    {
+      "index_name": "slots_city_idx",
+      "definition": "CREATE INDEX slots_city_idx ON public.slots USING btree (city)"
+    },
+    {
+      "index_name": "slots_master_date_idx",
+      "definition": "CREATE INDEX slots_master_date_idx ON public.slots USING btree (master_id, date_time)"
+    },
+    {
+      "index_name": "slots_one_live_time_per_master",
+      "definition": "CREATE UNIQUE INDEX slots_one_live_time_per_master ON public.slots USING btree (master_id, date_time) WHERE (status = ANY (ARRAY['Свободен'::text, 'Ожидает подтверждения'::text, 'Занят'::text]))"
+    },
+    {
+      "index_name": "slots_pkey",
+      "definition": "CREATE UNIQUE INDEX slots_pkey ON public.slots USING btree (slot_id)"
+    },
+    {
+      "index_name": "users_pkey",
+      "definition": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (user_id)"
+    }
+  ]
+}

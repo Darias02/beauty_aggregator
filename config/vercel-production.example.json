@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python3 scripts/build_production_frontend.py",
+  "outputDirectory": "dist-production",
+  "framework": null,
+  "headers": [
+    {"source": "/", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+    {"source": "/index.html", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+    {"source": "/release.json", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+    {"source": "/artifact-manifest.json", "headers": [{"key": "Cache-Control", "value": "no-store"}]}
+  ]
+}
