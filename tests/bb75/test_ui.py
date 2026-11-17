@@ -52,6 +52,9 @@ def server(request, tmp_path_factory):
 
 @pytest.fixture
 def ui(server, request):
+    live_api = getattr(request, 'param', None) == 'http'
+    if live_api and request.config.getoption('--production-artifact'):
+        pytest.skip('local preview only')
     with sync_playwright() as p:
         browser = p.chromium.launch(channel='chrome', headless=True)
         context = browser.new_context(viewport={'width': 390, 'height': 844},
@@ -81,7 +84,11 @@ def ui(server, request):
             u = urlparse(r.request.url)
             if u.netloc in (urlparse(server).netloc, 'bxzwfidujuejmrbqjmgo.supabase.co') and u.path.startswith('/functions/v1/'):
                 if live_api:
-                    r.continue_()
+                    if u.netloc == urlparse(server).netloc:
+                        r.continue_()
+                    else:
+                        blocked.append(r.request.url)
+                        r.abort('blockedbyclient')
                     return
                 endpoint = u.path.rsplit('/', 1)[-1]
                 if api.hold == endpoint:
