@@ -706,3 +706,40 @@ def test_client_reference_layout(ui, width):
     tabs.filter(has_text='Архив').click()
     expect(page.locator('#screen-model-records .tab-full.active')).to_have_text('Архив')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+
+
+@pytest.mark.parametrize('width', [320, 390, 430])
+def test_master_profile_reference_layout(ui, width):
+    page, api = ui
+    page.set_viewport_size({'width': width, 'height': 844})
+    master(page)
+    navigate(page, 'screen-master-profile')
+    page.wait_for_timeout(350)
+    profile = page.locator('#screen-master-profile')
+    actions = profile.locator('.profile-action-btn')
+    expect(actions.locator('svg')).to_have_count(2)
+    for button in actions.all():
+        assert button.evaluate('(b)=>b.scrollWidth <= b.clientWidth')
+        assert button.locator('svg').bounding_box()['y'] < button.locator('span').bounding_box()['y']
+    if width == 390:
+        assert actions.first.bounding_box()['y'] == 380
+        assert profile.locator('.master-address-field').bounding_box()['y'] == 504
+        assert profile.locator('.btn-outline').bounding_box()['y'] == 617
+        assert profile.locator('.support-button').bounding_box()['y'] == 666
+        page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/reference-master-profile-390.png'))
+    address = page.get_by_label('Адрес предоставления услуг', exact=True)
+    address.fill('Локальный адрес мастера')
+    address.blur()
+    page.wait_for_timeout(100)
+    assert api.master['address'] == 'Локальный адрес мастера'
+    profile.get_by_role('button', name='Добавить слот', exact=True).click()
+    expect(page.locator('#screen-master-add')).to_be_visible()
+    navigate(page, 'screen-master-profile')
+    profile.get_by_role('button', name='Записи', exact=True).click()
+    expect(page.locator('#screen-master-records')).to_be_visible()
+    navigate(page, 'screen-master-profile')
+    profile.get_by_role('button', name='Написать в поддержку', exact=True).click()
+    assert 'https://t.me/darghff' in page.evaluate('__tgCalls')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    profile.get_by_role('button', name='Стать моделью', exact=True).click()
+    expect(page.locator('#screen-model-menu')).to_be_visible()

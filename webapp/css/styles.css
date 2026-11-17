@@ -891,3 +891,68 @@ button:disabled {
     #screen-model-profile .profile-bottom-actions .btn { font-size: 16px; }
     #screen-model-profile .support-button { font-size: 14px; }
 }
+
+/* Master profile measurements follow the 390px reference. */
+#screen-master-profile.active { display: flex; flex-direction: column; padding-top: 44px; }
+#screen-master-profile > .page-title {
+    font-size: 38px;
+    line-height: 46px;
+    font-weight: 400;
+    margin: 0 8px 39px;
+}
+#screen-master-profile .profile-header { margin-bottom: 23px; }
+#screen-master-profile .profile-avatar { width: 149px; height: 149px; margin: 0 auto; background-color: var(--card-bg); }
+#screen-master-profile .profile-name { margin-top: 3px; font-size: 27px; line-height: 32px; }
+#screen-master-profile .profile-role { margin: 0; font-size: 20px; line-height: 24px; color: var(--text-main); }
+#screen-master-profile .profile-actions { width: calc(100% + 9px); max-width: none; margin: 0 -2px 40px; gap: 17px; }
+#screen-master-profile .profile-action-btn {
+    height: 84px;
+    padding: 12px 4px;
+    gap: 5px;
+    font-size: 19px;
+    line-height: 24px;
+    white-space: nowrap;
+    box-shadow: none;
+}
+#screen-master-profile svg { width: 26px; height: 26px; flex-shrink: 0; }
+#screen-master-profile .master-address-field {
+    width: 250px;
+    max-width: 100%;
+    height: 71px;
+    margin-left: -2px;
+    padding: 4px;
+    background: var(--card-bg);
+}
+#screen-master-profile .master-address-field label { display: block; font-size: 16px; line-height: 24px; }
+#screen-master-profile .profile-address-input {
+    width: 100%;
+    height: 27px;
+    margin: 9px 0 0;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: #424242;
+    font-size: 12px;
+    box-shadow: none;
+}
+#screen-master-profile .profile-address-input::placeholder { color: #e0e0e0; font-size: 10px; text-align: center; }
+#screen-master-profile .profile-address-input:focus-visible { outline: 1px solid var(--primary-btn); }
+#screen-master-profile .profile-bottom-actions { max-width: none; margin: 42px 9px 0; gap: 7px; align-items: flex-start; }
+#screen-master-profile .profile-bottom-actions .btn {
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0;
+    font-size: 19px;
+    white-space: nowrap;
+    padding: 6px 10px;
+    height: 42px;
+}
+#screen-master-profile .profile-bottom-actions .btn-outline { width: 234px; }
+#screen-master-profile .support-button { width: 275px; font-size: 17px; background: var(--primary-btn); }
+@media (max-width: 359px) {
+    #screen-master-profile .profile-action-btn { font-size: 16px; }
+    #screen-master-profile .support-button { font-size: 14px; }
+}
