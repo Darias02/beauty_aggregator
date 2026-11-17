@@ -661,3 +661,48 @@ def test_updated_layout_geometry(ui, width):
         return r.left >= b.left && r.right <= b.right && r.bottom <= b.bottom;
     })''')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+
+
+@pytest.mark.parametrize('width', [320, 390, 430])
+def test_client_reference_layout(ui, width):
+    page, api = ui
+    page.set_viewport_size({'width': width, 'height': 844})
+    navigate(page, 'screen-model-profile')
+    page.wait_for_timeout(350)
+    profile = page.locator('#screen-model-profile')
+    actions = profile.locator('.profile-action-btn')
+    expect(actions.locator('svg')).to_have_count(2)
+    for button in actions.all():
+        assert button.evaluate('(b)=>b.scrollWidth <= b.clientWidth')
+        icon, label = button.locator('svg').bounding_box(), button.locator('span').bounding_box()
+        assert icon['y'] + icon['height'] <= label['y']
+    master_button = profile.locator('.btn-outline')
+    support_button = profile.locator('.support-button')
+    assert master_button.bounding_box()['width'] < support_button.bounding_box()['width'] < width
+    for button in (master_button, support_button):
+        assert button.evaluate('(b)=>b.scrollWidth <= b.clientWidth')
+    if width == 390:
+        assert master_button.bounding_box()['width'] == 232
+        assert support_button.bounding_box()['width'] == 276
+        assert master_button.bounding_box()['y'] == 570
+        assert support_button.bounding_box()['y'] == 666
+        assert abs(actions.first.bounding_box()['y'] - 380) <= 2
+        page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/reference-profile-390.png'))
+    actions.filter(has_text='Найти услугу').click()
+    expect(page.locator('#screen-model-search')).to_be_visible()
+    api.pending()
+    navigate(page, 'screen-model-records')
+    page.wait_for_timeout(350)
+    panel = page.locator('#screen-model-records .records-top-panel').bounding_box()
+    tabs = page.locator('#screen-model-records .tab-full')
+    left, right = tabs.nth(0).bounding_box(), tabs.nth(1).bounding_box()
+    assert panel['x'] == 0 and panel['y'] == 0 and panel['width'] == width
+    assert left['x'] == 0 and left['width'] == right['width'] == width / 2
+    assert right['x'] == width / 2
+    assert left['y'] + left['height'] == panel['y'] + panel['height'] == 168
+    expect(page.locator('.screen.active .record-card')).to_be_visible()
+    if width == 390:
+        page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/reference-records-390.png'))
+    tabs.filter(has_text='Архив').click()
+    expect(page.locator('#screen-model-records .tab-full.active')).to_have_text('Архив')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')

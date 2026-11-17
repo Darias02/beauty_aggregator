@@ -797,13 +797,94 @@ button:disabled {
     flex-shrink: 0;
 }
 
+/* Client records follow the edge-to-edge reference header. */
+#screen-model-records .records-top-panel {
+    padding: 48px 0 0;
+    border: 0;
+    border-radius: 0 0 12px 0;
+    background: #1c1c1d;
+    box-shadow: none;
+    margin-bottom: 36px;
+}
+#screen-model-records .records-title {
+    line-height: 32px;
+    margin-bottom: 32px;
+    font-weight: 400;
+}
+#screen-model-records .tabs-container-full {
+    padding: 0;
+    gap: 0;
+    background: transparent;
+    border-radius: 0;
+}
+#screen-model-records .tab-full {
+    min-width: 0;
+    height: 56px;
+    padding: 14px 6px;
+    font-size: 20px;
+    line-height: 26px;
+    font-weight: 400;
+    border-radius: 12px;
+}
+#screen-model-records .tab-full.active {
+    border-color: rgba(255,255,255,0.65);
+    background: linear-gradient(160deg, #2b2b2d, #202022);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.12), 0 -1px 3px rgba(0,0,0,0.15);
+}
+
+/* Client profile measurements follow the 390px reference. */
 #screen-model-profile.active {
     display: flex;
     flex-direction: column;
-    min-height: calc(100dvh - 140px - env(safe-area-inset-bottom));
+    padding-top: 44px;
 }
-#screen-model-profile > .page-title { text-align: center; }
-#screen-model-profile .profile-avatar { width: 112px; height: 112px; margin: 8px auto 16px; }
-#screen-model-profile .profile-actions { width: 100%; margin-bottom: 16px; }
-#screen-model-profile .profile-bottom-actions { width: 100%; flex: 1; gap: 24px; }
-#screen-model-profile .support-button { margin-top: auto; }
+#screen-model-profile > .page-title {
+    text-align: left;
+    font-size: 38px;
+    line-height: 46px;
+    font-weight: 400;
+    margin: 0 8px 39px;
+}
+#screen-model-profile .profile-header { margin-bottom: 47px; }
+#screen-model-profile .profile-avatar { width: 149px; height: 149px; margin: 0 auto; }
+#screen-model-profile .profile-name { margin-top: 3px; font-size: 27px; line-height: 32px; }
+#screen-model-profile .profile-actions {
+    width: calc(100% + 9px);
+    max-width: none;
+    margin: 0 -2px;
+    gap: 17px;
+}
+#screen-model-profile .profile-action-btn {
+    height: 84px;
+    padding: 12px 4px;
+    gap: 5px;
+    font-size: 19px;
+    line-height: 24px;
+    white-space: nowrap;
+    box-shadow: none;
+}
+#screen-model-profile svg { width: 26px; height: 26px; flex-shrink: 0; }
+#screen-model-profile .profile-bottom-actions {
+    max-width: none;
+    margin: 106px 8px 0;
+    gap: 26px;
+    align-items: flex-start;
+}
+#screen-model-profile .profile-bottom-actions .btn {
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0;
+    font-size: 19px;
+    white-space: nowrap;
+    padding: 10px;
+}
+#screen-model-profile .profile-bottom-actions .btn-outline { width: 232px; height: 70px; }
+#screen-model-profile .support-button { width: 276px; height: 42px; margin: 0; font-size: 17px; background: var(--card-bg); }
+@media (max-width: 359px) {
+    #screen-model-profile .profile-action-btn { font-size: 16px; }
+    #screen-model-profile .profile-bottom-actions .btn { font-size: 16px; }
+    #screen-model-profile .support-button { font-size: 14px; }
+}
