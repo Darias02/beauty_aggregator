@@ -1,0 +1,12 @@
+{
+    "imports": {
+        "@supabase/supabase-js": "npm:@supabase/supabase-js@2.118.0"
+    },
+    "compilerOptions": {
+        "strict": true
+    },
+    "tasks": {
+        "test": "node tests/booking.test.mjs",
+        "check": "deno check index.ts"
+    }
+}

@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 import {
     corsHeaders,
     getAdminKey,
@@ -15,6 +15,13 @@ Deno.serve(async (req) => {
         const body = await req.json();
         const botToken = Deno.env.get('BOT_TOKEN') || '';
         const actor = await validateInitData(body.init_data || '', botToken);
+
+        if (!actor) {
+            return Response.json(
+                { error: 'Invalid Telegram data' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
 
         const admin = createClient(
             Deno.env.get('SUPABASE_URL') || '',
@@ -40,7 +47,7 @@ Deno.serve(async (req) => {
             .eq('slot_id', booking.slot_id)
             .single();
 
-        if (!actor || Number(actor.id) !== Number(slot?.master_id)) {
+        if (!slot || Number(actor.id) !== Number(slot.master_id)) {
             return Response.json(
                 { error: 'Invalid Telegram data' },
                 { status: 401, headers: corsHeaders }

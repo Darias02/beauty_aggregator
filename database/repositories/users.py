@@ -17,7 +17,8 @@ def add_user(
     response = (
         supabase
         .table("users")
-        .upsert(data)
+        # Registration must not overwrite a name edited through BB-07.
+        .upsert(data, on_conflict="user_id", ignore_duplicates=True)
         .execute()
     )
 

@@ -1,0 +1,18 @@
+{
+    "imports": {
+        "@supabase/supabase-js": "npm:@supabase/supabase-js@2.118.0"
+    },
+    "compilerOptions": {
+        "strict": true
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "singleQuote": true,
+        "lineWidth": 100
+    },
+    "tasks": {
+        "test": "deno test tests/",
+        "check": "deno check index.ts tests/*.ts",
+        "lint": "deno lint . ../_shared/telegram.ts ../../../webapp/js/data/users.js ../../../webapp/js/screens/model/profile.js"
+    }
+}

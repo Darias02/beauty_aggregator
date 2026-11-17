@@ -3,3 +3,43 @@ verify_jwt = false
 
 [functions.notify-user]
 verify_jwt = false
+
+# Telegram authenticates with X-Telegram-Bot-Api-Secret-Token, not a Supabase JWT.
+[functions.telegram-webhook]
+verify_jwt = false
+
+# The handler verifies the signed Telegram initData before accessing profiles.
+[functions.user-profile]
+verify_jwt = false
+
+# The handler verifies signed Telegram initData before accessing the own master profile.
+[functions.master-profile]
+verify_jwt = false
+
+[functions.catalog]
+verify_jwt = false
+
+# BB-06 validates signed Telegram initData inside the handler before the server RPC.
+[functions.booking-create]
+verify_jwt = false
+
+# BB-09: signed Telegram initData is validated before any privileged avatar access.
+[functions.master-avatar]
+verify_jwt = false
+static_files = ["./functions/master-avatar/vendor/magick.wasm"]
+
+# BB-06 verifies signed Telegram initData before reading slots.
+[functions.slots-read]
+verify_jwt = false
+
+# BB-06 verifies signed Telegram initData before server-only slot write RPCs.
+[functions.slots-write]
+verify_jwt = false
+
+# BB-65: BB-06 verifies Telegram initData before ownership-scoped booking reads.
+[functions.bookings-read]
+verify_jwt = false
+
+# BB-66: BB-06 verifies signed initData before server-only booking decisions.
+[functions.bookings-write]
+verify_jwt = false
