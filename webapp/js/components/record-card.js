@@ -57,7 +57,6 @@ export function createRecordCard({
     card.innerHTML = `
         <div class="service-header">
             <div class="service-left">
-                <div class="service-icon">картинка<br>услуги</div>
                 <div class="record-main-info">
                     <div class="service-title">${escapeHtml(getServiceName(record))}</div>
                     <div class="service-time">${escapeHtml(date)} · ${escapeHtml(time)}</div>
@@ -87,7 +86,7 @@ export function createRecordCard({
                 hapticImpact('light');
                 onCancel(record);
             });
-            card.appendChild(button);
+            actionGroup.appendChild(button);
         }
 
         if (typeof onContact === 'function' && status === 'Активна') {
