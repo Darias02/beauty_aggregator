@@ -711,7 +711,11 @@ button:active,
     align-items: center;
     justify-content: center;
     gap: 8px;
-    white-space: nowrap;
+    white-space: normal;
+    min-width: 0;
+    border: 0;
+    color: var(--text-main);
+    line-height: 1.4;
     box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);
 }
 
@@ -792,3 +796,14 @@ button:disabled {
 .booking-details > div > span:first-child {
     flex-shrink: 0;
 }
+
+#screen-model-profile.active {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 140px - env(safe-area-inset-bottom));
+}
+#screen-model-profile > .page-title { text-align: center; }
+#screen-model-profile .profile-avatar { width: 112px; height: 112px; margin: 8px auto 16px; }
+#screen-model-profile .profile-actions { width: 100%; margin-bottom: 16px; }
+#screen-model-profile .profile-bottom-actions { width: 100%; flex: 1; gap: 24px; }
+#screen-model-profile .support-button { margin-top: auto; }
