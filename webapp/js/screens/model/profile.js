@@ -1,37 +1,39 @@
-import { createOrUpdateUser, updateUserName } from '../../data/users.js';
-import {
-    getTelegramUser,
-    getTelegramUserId,
-    getTelegramDisplayName,
-    applyAvatars,
-    openSupport,
-    showTelegramPopup
-} from '../../telegram.js';
+import { ensureOwnProfile, updateOwnProfileName } from '../../data/users.js';
+import { applyAvatars, openSupport, showTelegramPopup } from '../../telegram.js';
 import { setUser } from '../../state.js';
 
 let initialized = false;
+let profileLoaded = false;
+let loading = null;
+let saving = false;
 
 export async function loadModelProfile() {
-    const userId = getTelegramUserId();
-    if (!userId) return;
-
-    try {
-        const tgUser = getTelegramUser();
-        const user = await createOrUpdateUser({
-            userId,
-            name: tgUser?.username ? `@${tgUser.username}` : getTelegramDisplayName()
-        });
-
-        setUser(user);
-        applyAvatars('model');
-
+    if (saving) return;
+    if (loading) return loading;
+    loading = (async () => {
         const name = document.getElementById('model-profile-name');
-        if (name) {
-            name.textContent = user?.name || getTelegramDisplayName();
-            name.dataset.edited = 'true';
+        profileLoaded = false;
+        try {
+            const user = await ensureOwnProfile();
+            setUser(user);
+            profileLoaded = true;
+            applyAvatars('model');
+            if (name) {
+                name.textContent = user.name;
+                name.dataset.edited = 'true';
+            }
+        } catch (error) {
+            setUser(null);
+            if (name) {
+                name.textContent = error.message || 'Не удалось загрузить профиль.';
+                name.dataset.edited = 'false';
+            }
         }
-    } catch (error) {
-        console.error('Model profile loading error:', error);
+    })();
+    try {
+        await loading;
+    } finally {
+        loading = null;
     }
 }
 
@@ -40,24 +42,35 @@ function setupNameEditing() {
     if (!element) return;
 
     element.addEventListener('click', async () => {
-        const newName = window.prompt(
+        if (!profileLoaded) {
+            await loadModelProfile();
+            return;
+        }
+        if (saving || loading) return;
+        const newName = globalThis.prompt(
             'Введите новый никнейм:',
-            element.textContent.trim()
+            element.textContent.trim(),
         );
 
         if (newName === null) return;
 
+        saving = true;
         try {
-            const updated = await updateUserName(
-                getTelegramUserId(),
-                newName
-            );
+            const updated = await updateOwnProfileName(newName);
 
             element.textContent = updated.name;
             element.dataset.edited = 'true';
             setUser(updated);
         } catch (error) {
+            if (error.code === 'UNAUTHORIZED') {
+                profileLoaded = false;
+                setUser(null);
+                element.textContent = error.message;
+                element.dataset.edited = 'false';
+            }
             showTelegramPopup(error.message || 'Не удалось изменить никнейм.');
+        } finally {
+            saving = false;
         }
     });
 }

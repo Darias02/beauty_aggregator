@@ -1,44 +1,73 @@
-import { supabase } from './supabase.js';
+import { APP_CONFIG } from '../config.js';
+import { getTelegramInitData } from '../telegram.js';
 
-export async function getServices() {
-    const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .order('service_id')
-        .limit(100);
+const messages = {
+    UNAUTHORIZED: 'Авторизация отсутствует или истекла. Откройте приложение заново через Telegram.',
+    CATALOG_UNAVAILABLE: 'Не удалось загрузить каталог. Попробуйте позже.',
+};
 
-    if (error) throw error;
-    return data || [];
+export class CatalogApiError extends Error {
+    constructor(code, status = 0) {
+        super(messages[code] || messages.CATALOG_UNAVAILABLE);
+        this.name = 'CatalogApiError';
+        this.code = code;
+        this.status = status;
+    }
 }
 
-export async function getAvailableServiceCounts() {
-    const { data, error } = await supabase
-        .from('slots')
-        .select('service_id')
-        .eq('status', 'Свободен');
-
-    if (error) throw error;
-
-    const counts = {};
-
-    for (const slot of data || []) {
-        counts[slot.service_id] = (counts[slot.service_id] || 0) + 1;
+export function createCatalogClient({ url, key, getInitData, fetchImpl = globalThis.fetch }) {
+    async function request(action) {
+        const initData = getInitData();
+        if (typeof initData !== 'string' || !initData) {
+            throw new CatalogApiError('UNAUTHORIZED', 401);
+        }
+        let response;
+        let result;
+        try {
+            response = await fetchImpl(`${url}/functions/v1/catalog`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', apikey: key },
+                cache: 'no-store',
+                credentials: 'omit',
+                redirect: 'error',
+                body: JSON.stringify({ action, init_data: initData }),
+            });
+            result = await response.json();
+        } catch {
+            throw new CatalogApiError('CATALOG_UNAVAILABLE');
+        }
+        if (!response.ok) {
+            throw new CatalogApiError(
+                response.status === 401 ? 'UNAUTHORIZED' : 'CATALOG_UNAVAILABLE',
+                response.status,
+            );
+        }
+        const value = result?.[action];
+        const valid = action === 'services'
+            ? Array.isArray(value) &&
+                value.every((service) =>
+                    Number.isSafeInteger(service?.service_id) && typeof service.name === 'string'
+                )
+            : action === 'cities'
+            ? Array.isArray(value) && value.every((city) => typeof city === 'string')
+            : value !== null && typeof value === 'object' && !Array.isArray(value) &&
+                Object.values(value).every((count) => Number.isSafeInteger(count) && count >= 0);
+        if (!valid) throw new CatalogApiError('CATALOG_UNAVAILABLE', response.status);
+        return value;
     }
 
-    return counts;
+    return {
+        getServices: () => request('services'),
+        getAvailableServiceCounts: () => request('counts'),
+        getAvailableCities: () => request('cities'),
+    };
 }
 
-export async function getAvailableCities() {
-    const { data, error } = await supabase
-        .from('slots')
-        .select('city')
-        .not('city', 'is', null);
+const client = createCatalogClient({
+    url: APP_CONFIG.supabase.url,
+    key: APP_CONFIG.supabase.key,
+    getInitData: getTelegramInitData,
+    fetchImpl: (...args) => fetch(...args),
+});
 
-    if (error) throw error;
-
-    return [...new Set(
-        (data || [])
-            .map((row) => String(row.city || '').trim())
-            .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b, 'ru'));
-}
+export const { getServices, getAvailableServiceCounts, getAvailableCities } = client;

@@ -1,173 +1,146 @@
-import { supabase } from './supabase.js';
+import { APP_CONFIG } from '../config.js';
+import { getTelegramInitData } from '../telegram.js';
 
-export async function getAvailableSlots(serviceId, city = null, userId = null) {
-    if (!serviceId) return [];
+const messages = {
+    UNAUTHORIZED: 'Авторизация отсутствует или истекла. Откройте приложение заново через Telegram.',
+    SLOTS_WRITE_UNAVAILABLE: 'Не удалось сохранить изменения слота. Попробуйте позже.',
+    SLOT_DUPLICATE: 'Слот на это время уже существует.',
+    SLOT_EXPIRED: 'Нельзя создать слот в прошлом.',
+    SLOT_NOT_FOUND: 'Слот или профиль мастера не найден.',
+    SLOT_UNAVAILABLE: 'Слот недоступен для этой операции. Обновите список и попробуйте снова.',
+    SLOT_HAS_HISTORY: 'Нельзя удалить слот с историей записей. История сохранена.',
+    INVALID_REQUEST: 'Проверьте услугу, город, дату, время, адрес и описание.',
+    SLOTS_UNAVAILABLE: 'Не удалось загрузить слоты. Попробуйте позже.',
+};
 
-    let query = supabase
-        .from('slots')
-        .select(`
-            *,
-            services (
-                service_id,
-                name,
-                icon_url
-            )
-        `)
-        .eq('service_id', serviceId)
-        .eq('status', 'Свободен')
-        .order('date_time');
-
-    if (city && city !== 'Город') {
-        query = query.eq('city', city);
+export class SlotsApiError extends Error {
+    constructor(code, status = 0) {
+        super(messages[code] || messages.SLOTS_UNAVAILABLE);
+        this.name = 'SlotsApiError';
+        this.code = code;
+        this.status = status;
     }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-
-    let slots = data || [];
-
-    if (userId && slots.length) {
-        const { data: rejected, error: rejectedError } = await supabase
-            .from('bookings')
-            .select('slot_id')
-            .eq('user_id', userId)
-            .eq('status', 'Отменена мастером')
-            .eq('reason', 'model');
-
-        if (rejectedError) throw rejectedError;
-
-        const hiddenSlotIds = new Set(
-            (rejected || []).map((row) => row.slot_id)
-        );
-
-        slots = slots.filter((slot) => !hiddenSlotIds.has(slot.slot_id));
-    }
-
-    return slots.filter((slot) => new Date(slot.date_time) > new Date());
 }
 
-export async function getSlot(slotId) {
-    const { data, error } = await supabase
-        .from('slots')
-        .select(`
-            *,
-            services (
-                service_id,
-                name,
-                icon_url
-            )
-        `)
-        .eq('slot_id', slotId)
-        .limit(1)
-        .maybeSingle();
-
-    if (error) throw error;
-    return data;
-}
-
-export async function getMasterSlots(masterId) {
-    const { data, error } = await supabase
-        .from('slots')
-        .select(`
-            *,
-            services (
-                service_id,
-                name,
-                icon_url
-            )
-        `)
-        .eq('master_id', masterId)
-        .order('date_time');
-
-    if (error) throw error;
-    return data || [];
-}
-
-export async function createSlot({ masterId, serviceId, dateTime, city, address = '', description = '' }) {
-    if (!masterId || !serviceId || !dateTime || !city) {
-        throw new Error('Заполните услугу, город, дату и время.');
-    }
-
-    const { data, error } = await supabase
-        .from('slots')
-        .insert({
-            master_id: masterId,
-            service_id: serviceId,
-            date_time: dateTime,
-            status: 'Свободен',
-            city,
-            address,
-            description
-        })
-        .select()
-        .single();
-
-    if (error) {
-        if (error.code === '23505') {
-            throw new Error('Слот на это время уже существует.');
+export function createSlotsReadClient({ url, key, getInitData, fetchImpl = globalThis.fetch }) {
+    async function request(action, fields = {}) {
+        const initData = getInitData();
+        if (typeof initData !== 'string' || !initData) {
+            throw new SlotsApiError('UNAUTHORIZED', 401);
         }
-        throw error;
+        let response;
+        let result;
+        try {
+            response = await fetchImpl(`${url}/functions/v1/slots-read`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', apikey: key },
+                cache: 'no-store',
+                credentials: 'omit',
+                redirect: 'error',
+                body: JSON.stringify({ action, ...fields, init_data: initData }),
+            });
+            result = await response.json();
+        } catch {
+            throw new SlotsApiError('SLOTS_UNAVAILABLE');
+        }
+        if (!response.ok) {
+            throw new SlotsApiError(
+                response.status === 401 ? 'UNAUTHORIZED' : 'SLOTS_UNAVAILABLE',
+                response.status,
+            );
+        }
+        const value = action === 'slot' ? result?.slot : result?.slots;
+        const validSlot = (slot) => slot && Number.isSafeInteger(slot.slot_id) &&
+            typeof slot.date_time === 'string' && (slot.status === null || typeof slot.status === 'string');
+        if (action === 'slot' ? value !== null && !validSlot(value)
+            : !Array.isArray(value) || !value.every(validSlot)) {
+            throw new SlotsApiError('SLOTS_UNAVAILABLE', response.status);
+        }
+        return value;
     }
 
-    return data;
+    return {
+        // Legacy actor arguments remain accepted by JS callers but never leave the browser.
+        getAvailableSlots: (serviceId, city = null, _userId = null) => !serviceId
+            ? Promise.resolve([]) : request('available', { service_id: serviceId, city }),
+        getSlot: (slotId) => request('slot', { slot_id: slotId }),
+        getMasterSlots: (_masterId) => request('master'),
+    };
 }
 
-export async function deleteSlot(slotId, masterId) {
-    const { error } = await supabase
-        .from('slots')
-        .delete()
-        .eq('slot_id', slotId)
-        .eq('master_id', masterId)
-        .eq('status', 'Свободен');
+const client = createSlotsReadClient({
+    url: APP_CONFIG.supabase.url,
+    key: APP_CONFIG.supabase.key,
+    getInitData: getTelegramInitData,
+    fetchImpl: (...args) => fetch(...args),
+});
 
-    if (error) throw error;
-}
+export const { getAvailableSlots, getSlot, getMasterSlots } = client;
 
-export async function cancelSlot(slotId, masterId) {
-    const slot = await getSlot(slotId);
-
-    if (!slot || slot.master_id !== masterId) {
-        throw new Error('Слот не найден.');
+export function createSlotsWriteClient({ url, key, getInitData, fetchImpl = globalThis.fetch }) {
+    async function request(action, fields) {
+        const initData = getInitData();
+        if (typeof initData !== 'string' || !initData) throw new SlotsApiError('UNAUTHORIZED', 401);
+        let response;
+        let result;
+        try {
+            response = await fetchImpl(`${url}/functions/v1/slots-write`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', apikey: key },
+                cache: 'no-store',
+                credentials: 'omit',
+                redirect: 'error',
+                body: JSON.stringify({ action, ...fields, init_data: initData }),
+            });
+            result = await response.json();
+        } catch {
+            throw new SlotsApiError('SLOTS_WRITE_UNAVAILABLE');
+        }
+        if (!response.ok) {
+            const code = response.status === 401 ? 'UNAUTHORIZED' : result?.error?.code;
+            throw new SlotsApiError(
+                Object.hasOwn(messages, code) ? code : 'SLOTS_WRITE_UNAVAILABLE',
+                response.status,
+            );
+        }
+        if (action === 'cancel') {
+            if (result?.deleted === true && !Object.hasOwn(result, 'booking')) {
+                return { deleted: true };
+            }
+            const booking = result?.booking;
+            if (result?.deleted !== false || !booking ||
+                !Number.isSafeInteger(booking.booking_id) || booking.booking_id <= 0 ||
+                booking.slot_id !== Number(fields.slot_id) ||
+                booking.status !== 'Отменена мастером' || booking.reason !== 'plans') {
+                throw new SlotsApiError('SLOTS_WRITE_UNAVAILABLE');
+            }
+            return { deleted: false, booking };
+        }
+        if (action === 'delete') {
+            if (result?.deleted !== true) throw new SlotsApiError('SLOTS_WRITE_UNAVAILABLE');
+            return;
+        }
+        const slot = result?.slot;
+        if (!slot || !Number.isSafeInteger(slot.slot_id) || slot.slot_id <= 0 ||
+            typeof slot.date_time !== 'string' || slot.status !== 'Свободен') {
+            throw new SlotsApiError('SLOTS_WRITE_UNAVAILABLE');
+        }
+        return slot;
     }
-
-    const { data: booking, error } = await supabase
-        .from('bookings')
-        .select('booking_id,status')
-        .eq('slot_id', slotId)
-        .in('status', [
-            'Ожидает подтверждения мастера',
-            'Активна'
-        ])
-        .limit(1)
-        .maybeSingle();
-
-    if (error) throw error;
-
-    if (!booking) {
-        await deleteSlot(slotId, masterId);
-        return { deleted: true };
-    }
-
-    const { data, error: bookingError } = await supabase
-        .from('bookings')
-        .update({
-            status: 'Отменена мастером',
-            reason: 'plans'
-        })
-        .eq('booking_id', booking.booking_id)
-        .select()
-        .single();
-
-    if (bookingError) throw bookingError;
-
-    const { error: slotError } = await supabase
-        .from('slots')
-        .update({ status: 'Отменен' })
-        .eq('slot_id', slotId)
-        .eq('master_id', masterId);
-
-    if (slotError) throw slotError;
-
-    return { deleted: false, booking: data };
+    return {
+        // Preserve the UI signatures; the legacy masterId is deliberately ignored.
+        createSlot: ({ masterId: _masterId, serviceId, dateTime, city, address = '', description = '' }) =>
+            request('create', { service_id: serviceId, date_time: dateTime, city, address, description }),
+        deleteSlot: (slotId, _masterId) => request('delete', { slot_id: slotId }),
+        cancelSlot: (slotId, _masterId) => request('cancel', { slot_id: slotId }),
+    };
 }
+
+const writeClient = createSlotsWriteClient({
+    url: APP_CONFIG.supabase.url,
+    key: APP_CONFIG.supabase.key,
+    getInitData: getTelegramInitData,
+    fetchImpl: (...args) => fetch(...args),
+});
+
+export const { createSlot, deleteSlot, cancelSlot } = writeClient;

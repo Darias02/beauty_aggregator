@@ -469,9 +469,13 @@ function createSlotCard(
         async (event) => {
             event.stopPropagation();
 
-            await bookSlot(
-                slot
-            );
+            if (button.disabled) return;
+            button.disabled = true;
+            try {
+                await bookSlot(slot);
+            } finally {
+                button.disabled = false;
+            }
         }
     );
 

@@ -49,6 +49,11 @@ export async function loadModelMenu() {
             await getAvailableServiceCounts();
 
 
+        if (!services.length) {
+            showSkeleton(container, 'Услуг пока нет');
+            return;
+        }
+
         renderServiceCards({
             container,
             services,

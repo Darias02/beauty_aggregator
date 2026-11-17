@@ -1,4 +1,5 @@
 let activeModal = null;
+let previousBodyOverflow = '';
 
 export function initModals() {
     document.addEventListener('keydown', (event) => {
@@ -42,6 +43,8 @@ export function openChoiceModal({
         button.textContent = choice.text;
 
         button.addEventListener('click', async () => {
+            if (button.disabled) return;
+            buttons.querySelectorAll('button').forEach((action) => { action.disabled = true; });
             const callback = onSelect;
             closeModal();
             await callback?.(choice.value);
@@ -60,6 +63,8 @@ export function openChoiceModal({
     overlay.appendChild(box);
     document.body.appendChild(overlay);
     activeModal = overlay;
+    previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
 
     requestAnimationFrame(() => overlay.classList.add('active'));
 
@@ -115,6 +120,7 @@ export function closeModal() {
 
     const modal = activeModal;
     activeModal = null;
+    document.body.style.overflow = previousBodyOverflow;
     modal.classList.remove('active');
 
     setTimeout(() => modal.remove(), 300);

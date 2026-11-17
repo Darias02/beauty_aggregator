@@ -61,7 +61,7 @@ export async function loadMasterMenu() {
                     });
                 }
             }));
-        }
+        });
     } catch (error) {
         console.error('Master menu loading error:', error);
         container.innerHTML = 'Не удалось загрузить<br>заявки';

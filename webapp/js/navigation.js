@@ -36,10 +36,10 @@ export function initNavigation({
 
 
         const itemWidth =
-            333 / Math.max(items.length, 1);
+            100 / Math.max(items.length, 1);
 
         indicator.style.width =
-            `${itemWidth}px`;
+            `${itemWidth}%`;
 
 
         items.forEach((item, index) => {
@@ -49,7 +49,7 @@ export function initNavigation({
             element.className = 'nav-item';
 
             element.style.width =
-                `${itemWidth}px`;
+                `${itemWidth}%`;
 
             element.innerHTML = `
                 <div
@@ -110,7 +110,7 @@ export function initNavigation({
 
         if (activeIndex >= 0) {
             indicator.style.left =
-                `${activeIndex * (333 / items.length)}px`;
+                `${activeIndex * (100 / items.length)}%`;
         } else {
             indicator.style.left = '0px';
         }

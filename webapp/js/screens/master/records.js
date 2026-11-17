@@ -42,8 +42,13 @@ export async function loadMasterRecords() {
     }
 }
 
-function getBooking(slotId) {
-    return bookings.find((booking) => booking.slot_id === slotId);
+function getBooking(slot) {
+    const history = bookings.filter((booking) => booking.slot_id === slot.slot_id);
+    const current = history.find((booking) =>
+        ['Ожидает подтверждения мастера', 'Активна'].includes(booking.status));
+    // A reopened slot belongs to no historical applicant. Keep history for
+    // terminal slots and the archive, but prefer a current applicant at any age.
+    return current || (slot.status !== 'Свободен' ? history[0] : undefined);
 }
 
 function renderTabs() {
@@ -95,7 +100,7 @@ function renderRecords() {
     }
 
     filtered.forEach((slot) => {
-        const booking = getBooking(slot.slot_id);
+        const booking = getBooking(slot);
         const record = booking
             ? { ...booking, slot, slots: slot }
             : { ...slot, slots: slot };

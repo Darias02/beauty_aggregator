@@ -106,7 +106,16 @@ export function createRecordCard({
             button.className = 'btn-approve';
             button.type = 'button';
             button.textContent = 'Подтвердить';
-            button.addEventListener('click', () => onApprove(record));
+            button.addEventListener('click', async () => {
+                if (button.disabled) return;
+                const buttons = actionGroup.querySelectorAll('button');
+                buttons.forEach((action) => { action.disabled = true; });
+                try {
+                    await onApprove(record);
+                } finally {
+                    buttons.forEach((action) => { action.disabled = false; });
+                }
+            });
             actionGroup.appendChild(button);
         }
 

@@ -29,6 +29,7 @@ import {
 
 
 let initialized = false;
+let publishing = false;
 
 let services = [];
 
@@ -317,6 +318,7 @@ function clearForm() {
 
 
 export async function createMasterSlot() {
+    if (publishing) return;
     const masterId =
         getTelegramUserId();
 
@@ -395,6 +397,10 @@ export async function createMasterSlot() {
             ?.trim() || '';
 
 
+    const button = document.querySelector('#screen-master-add .publish-slot-button');
+    publishing = true;
+    if (button) button.disabled = true;
+
     try {
         hapticImpact('medium');
 
@@ -428,6 +434,9 @@ export async function createMasterSlot() {
             error.message ||
             'Не удалось создать слот.'
         );
+    } finally {
+        publishing = false;
+        if (button) button.disabled = false;
     }
 }
 
@@ -457,7 +466,7 @@ export function initMasterAddSlot() {
 
     const publishButton =
         document.querySelector(
-            '#screen-master-add .btn-primary:last-child'
+            '#screen-master-add .publish-slot-button'
         );
 
 

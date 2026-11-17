@@ -16,11 +16,8 @@ import {
 let initialized = false;
 
 export async function loadMasterProfile() {
-    const masterId = getTelegramUserId();
-    if (!masterId) return;
-
     try {
-        const master = await ensureMaster(masterId);
+        const master = await ensureMaster();
 
         const name = document.getElementById('master-profile-name');
         const address = document.getElementById('master-address-input');
@@ -37,6 +34,11 @@ export async function loadMasterProfile() {
         applyAvatars('master');
     } catch (error) {
         console.error('Master profile loading error:', error);
+        const name = document.getElementById('master-profile-name');
+        if (name) {
+            name.textContent = error.message || 'Не удалось загрузить профиль.';
+            name.dataset.edited = 'false';
+        }
     }
 }
 
@@ -45,7 +47,7 @@ function setupNameEditing() {
     if (!element) return;
 
     element.addEventListener('click', async () => {
-        const newName = window.prompt(
+        const newName = globalThis.prompt(
             'Введите новый никнейм:',
             element.textContent.trim()
         );
@@ -76,7 +78,7 @@ function setupAddressEditing() {
                 getTelegramUserId(),
                 input.value
             );
-        } catch (error) {
+        } catch {
             showTelegramPopup('Не удалось сохранить адрес.');
         }
     });

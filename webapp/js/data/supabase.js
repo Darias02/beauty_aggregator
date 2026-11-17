@@ -1,4 +1,5 @@
 import { APP_CONFIG } from '../config.js';
+import { getServices } from './services.js';
 
 
 function createSupabaseClient() {
@@ -26,14 +27,10 @@ export const supabase =
 
 export async function checkSupabaseConnection() {
     try {
-        const { error } =
-            await supabase
-                .from('services')
-                .select('service_id')
-                .limit(1);
+        await getServices();
 
 
-        return !error;
+        return true;
     } catch (error) {
         console.error(
             'Supabase connection error:',
