@@ -48,13 +48,13 @@ export function getCurrentAvatarUrl(role = state.currentRole) {
 function setElementAvatar(element, avatarUrl) {
     if (!element) return;
     element.style.backgroundImage = avatarUrl ? `url("${avatarUrl}")` : '';
-    element.textContent = '';
+    if (!element.classList.contains('nav-avatar')) element.textContent = '';
 }
 
 export function applyAvatars(role = state.currentRole) {
     const sharedAvatarUrl = getCurrentAvatarUrl(role);
 
-    document.querySelectorAll('[data-avatar]').forEach((element) => {
+    document.querySelectorAll('[data-avatar], .nav-avatar').forEach((element) => {
         setElementAvatar(element, sharedAvatarUrl);
     });
 

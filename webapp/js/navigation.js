@@ -1,3 +1,5 @@
+import { getCurrentAvatarUrl } from './telegram.js';
+
 export function initNavigation({
     navStructure,
     getCurrentRole,
@@ -44,21 +46,29 @@ export function initNavigation({
 
         items.forEach((item, index) => {
             const element =
-                document.createElement('div');
+                document.createElement('button');
 
             element.className = 'nav-item';
+            element.type = 'button';
 
             element.style.width =
                 `${itemWidth}%`;
 
+            const paths = {
+                menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+                search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
+                records: '<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16m-11 4h2m2 0h2"/>',
+                profile: '<circle cx="12" cy="9" r="3"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>'
+            };
+            const icon = `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[item.id] || paths.records}</svg>`;
             element.innerHTML = `
-                <div
-                    class="nav-text"
-                    style="margin-top: 15px;"
-                >
-                    ${escapeHtml(item.text)}
-                </div>
+                ${item.id === 'profile' ? `<span class="nav-avatar" aria-hidden="true">${icon}</span>` : icon}
+                <span class="nav-text">${escapeHtml(item.text)}</span>
             `;
+            const avatar = element.querySelector('.nav-avatar');
+            const avatarUrl = getCurrentAvatarUrl();
+            if (avatar && avatarUrl) avatar.style.backgroundImage = `url("${avatarUrl}")`;
+
 
 
             element.addEventListener(
@@ -101,6 +111,7 @@ export function initNavigation({
 
 
         elements.forEach((element, index) => {
+            element.setAttribute('aria-current', index === activeIndex ? 'page' : 'false');
             element.classList.toggle(
                 'active',
                 index === activeIndex
