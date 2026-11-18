@@ -511,16 +511,15 @@
 
         <label class="slot-address slot-city">
 
-            <span>Город</span>
+            <span>Город *</span>
 
             <input
                 id="slot-city-input"
-                list="slot-city-list"
+                required
+                maxlength="200"
                 type="text"
                 placeholder="Введите город"
             >
-
-            <datalist id="slot-city-list"></datalist>
 
         </label>
 
@@ -530,6 +529,7 @@
 
             <input
                 id="slot-address-input"
+                maxlength="500"
                 type="text"
                 placeholder="Введите адрес"
             >
@@ -669,6 +669,7 @@
             <label for="master-address-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Адрес предоставления услуг</span></label>
             <input
                 id="master-address-input"
+                maxlength="500"
                 class="profile-address-input"
                 type="text"
                 placeholder="Место для ввода"

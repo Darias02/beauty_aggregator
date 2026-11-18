@@ -1,3 +1,5 @@
+import { attachAddressAutocomplete } from '../../components/address-autocomplete.js';
+
 import {
     getServices
 } from '../../data/services.js';
@@ -290,8 +292,7 @@ function clearForm() {
 
 
     if (city) {
-        city.value =
-            'Москва';
+        city.value = '';
     }
 
 
@@ -314,6 +315,7 @@ function clearForm() {
 
 
     resetSlotCreation();
+    document.dispatchEvent(new Event('bb:slot-form-reset'));
 }
 
 
@@ -378,6 +380,12 @@ export async function createMasterSlot() {
             ?.value
             ?.trim() || '';
 
+
+    if (!city || city === 'Город') {
+        showTelegramPopup('Укажите город.');
+        document.getElementById('slot-city-input')?.focus();
+        return;
+    }
 
     const address =
         document
@@ -447,6 +455,24 @@ export function initMasterAddSlot() {
     }
 
     initialized = true;
+
+    const cityInput = document.getElementById('slot-city-input');
+    const addressInput = document.getElementById('slot-address-input');
+    let selectedCity = null;
+    const addressSuggestions = attachAddressAutocomplete(addressInput, {
+        mode: 'address',
+        context: () => ({ city: cityInput?.value.trim() || '', cityId: selectedCity?.cityId || null }),
+    });
+    attachAddressAutocomplete(cityInput, {
+        mode: 'city',
+        onSelect: (item) => { selectedCity = item; addressSuggestions?.close(); },
+        onEdit: () => { selectedCity = null; addressSuggestions?.close(); },
+    });
+    // The successful create resets text and its transient geographic context together.
+    document.addEventListener('bb:slot-form-reset', () => {
+        selectedCity = null;
+        addressSuggestions?.close();
+    });
 
 
     document.addEventListener(

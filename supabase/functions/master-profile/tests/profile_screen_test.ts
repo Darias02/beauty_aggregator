@@ -12,6 +12,9 @@ Deno.test('Master screen: own data, editing, cancellation, API failures and avat
     };
     const address = {
         value: '',
+        before: () => {},
+        setAttribute: () => {},
+        removeAttribute: () => {},
         addEventListener: (event: string, fn: () => Promise<void>) =>
             events.set(`address:${event}`, fn),
     };
@@ -37,6 +40,7 @@ Deno.test('Master screen: own data, editing, cancellation, API failures and avat
             },
         },
         document: {
+            createElement: () => ({ setAttribute: () => {}, append: () => {}, replaceChildren: () => {} }),
             getElementById: (id: string) =>
                 id === 'master-profile-name'
                     ? name
@@ -95,6 +99,7 @@ Deno.test('Master screen: own data, editing, cancellation, API failures and avat
         nextName = 'Не сохранится';
         await events.get('name:click')!();
         equal(name.textContent, 'Новое имя');
+        address.value = 'Не сохранится';
         await events.get('address:blur')!();
         equal(popups.at(-1), 'Не удалось сохранить адрес.');
         await loadMasterProfile();

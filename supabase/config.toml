@@ -43,3 +43,7 @@ verify_jwt = false
 # BB-66: BB-06 verifies signed initData before server-only booking decisions.
 [functions.bookings-write]
 verify_jwt = false
+
+# Signed Telegram init_data is verified by the handler before contacting DaData.
+[functions.address-suggest]
+verify_jwt = false

@@ -1,3 +1,5 @@
+import { attachAddressAutocomplete } from '../../components/address-autocomplete.js';
+
 import {
     ensureMaster,
     updateMasterName,
@@ -14,9 +16,14 @@ import {
 } from '../../telegram.js';
 
 let initialized = false;
+let savedAddress = '';
+let addressRevision = 0;
+let addressWrites = Promise.resolve();
 
 export async function loadMasterProfile() {
+    const revision = addressRevision;
     try {
+        await addressWrites;
         const master = await ensureMaster();
 
         const name = document.getElementById('master-profile-name');
@@ -27,8 +34,9 @@ export async function loadMasterProfile() {
             name.dataset.edited = 'true';
         }
 
-        if (address) {
+        if (address && revision === addressRevision) {
             address.value = master?.address || '';
+            savedAddress = address.value;
         }
 
         applyAvatars('master');
@@ -72,16 +80,27 @@ function setupAddressEditing() {
     const input = document.getElementById('master-address-input');
     if (!input) return;
 
-    input.addEventListener('blur', async () => {
-        try {
-            await updateMasterAddress(
-                getTelegramUserId(),
-                input.value
-            );
-        } catch {
-            showTelegramPopup('Не удалось сохранить адрес.');
-        }
+    input.addEventListener('input', () => { addressRevision++; });
+    attachAddressAutocomplete(input, {
+        mode: 'address',
+        onSelect: () => { addressRevision++; },
     });
+    const save = () => {
+        const value = input.value.trim();
+        // Serialize edits so an earlier slow request cannot overwrite a later selection.
+        addressWrites = addressWrites.then(async () => {
+            if (value === savedAddress) return;
+            try {
+                const master = await updateMasterAddress(getTelegramUserId(), value);
+                savedAddress = master.address || '';
+            } catch {
+                showTelegramPopup('Не удалось сохранить адрес.');
+            }
+        });
+        return addressWrites;
+    };
+    input.addEventListener('change', save);
+    input.addEventListener('blur', save);
 }
 
 function setupAvatarEditing() {

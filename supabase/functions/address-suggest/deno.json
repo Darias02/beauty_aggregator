@@ -1,0 +1,9 @@
+{
+    "compilerOptions": { "strict": true },
+    "fmt": { "indentWidth": 4, "singleQuote": true, "lineWidth": 100 },
+    "tasks": {
+        "test": "deno test tests/",
+        "check": "deno check index.ts tests/*.ts",
+        "lint": "deno lint . ../../../webapp/js/data/address-suggestions.js ../../../webapp/js/components/address-autocomplete.js"
+    }
+}
