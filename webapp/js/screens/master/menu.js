@@ -1,3 +1,4 @@
+import { outlineIcon } from '../../components/icons.js';
 import { getMasterBookings, confirmBooking, rejectBooking } from '../../data/bookings.js';
 import { createRecordCard } from '../../components/record-card.js';
 import { getTelegramUserId, showTelegramPopup } from '../../telegram.js';
@@ -30,7 +31,7 @@ export async function loadMasterMenu() {
         list.innerHTML = '';
 
         if (!pending.length) {
-            container.innerHTML = 'На данный момент<br>нет активных заявок';
+            container.innerHTML = `${outlineIcon('description')}<span>На данный момент<br>нет активных заявок</span>`;
             return;
         }
 

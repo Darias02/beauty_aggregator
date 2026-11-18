@@ -139,6 +139,15 @@ def navigate(page, screen):
     expect(page.locator('#' + screen)).to_be_visible()
 
 
+def open_available_slot(page, last=False):
+    summaries = page.locator('#model-search-results summary')
+    summary = summaries.last if last else summaries.first
+    expect(summary).to_be_visible()
+    if summary.get_attribute('aria-expanded') == 'false':
+        summary.click()
+    expect(summary).to_have_attribute('aria-expanded', 'true')
+
+
 def master(page):
     page.evaluate("window.switchRole('master')")
     expect(page.locator('#screen-master-menu')).to_be_visible()
@@ -178,6 +187,7 @@ def test_booking_and_model_cancel(ui):
     page, api = ui
     page.locator('#model-menu-services button').first.click()
     expect(page.locator('#model-search-results')).to_contain_text('Записаться')
+    open_available_slot(page, last=False)
     page.locator('#model-search-results button').click()
     expect(page.locator('#screen-model-success')).to_be_visible()
     navigate(page, 'screen-model-records')
@@ -253,6 +263,7 @@ def test_mobile_layout(ui, width, height):
 def test_booking_double_click(ui):
     page, api = ui
     page.locator('#model-menu-services button').first.click()
+    open_available_slot(page, last=False)
     button = page.locator('#model-search-results button')
     expect(button).to_be_visible()
     button.evaluate('(b)=>{b.click();b.click()}')
@@ -306,12 +317,16 @@ def test_invalid_avatar_and_api_failure(ui):
 def test_booking_error_retry(ui):
     page, api = ui
     page.locator('#model-menu-services button').first.click()
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_be_visible()
     api.failures['booking-create'] = 500
+    open_available_slot(page, last=False)
     page.locator('#model-search-results button').click()
     popup(page, 'Не удалось отправить заявку')
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_be_enabled()
     api.failures.clear()
+    open_available_slot(page, last=False)
     page.locator('#model-search-results button').click()
     expect(page.locator('#screen-model-success')).to_be_visible()
 
@@ -346,8 +361,10 @@ def test_long_catalog_and_success_mobile(ui):
     expect(page.locator('#model-menu-services .service-title')).to_contain_text('ОченьДлинноеНазвание')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.locator('#model-menu-services button').click()
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_be_visible()
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    open_available_slot(page, last=False)
     page.locator('#model-search-results button').click()
     expect(page.locator('#screen-model-success')).to_be_visible()
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -497,6 +514,7 @@ def test_city_filter_and_slots_network_error(ui):
     page.locator('#model-menu-services button').first.click()
     page.locator('.city-filter').click()
     page.locator('#city-dropdown .dropdown-item').filter(has_text='Москва').click()
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_be_visible()
     assert any(e == 'slots-read' and b.get('city') == 'Москва' for e,b in api.calls)
     api.failures['slots-read'] = 'network'
@@ -508,10 +526,13 @@ def test_city_filter_and_slots_network_error(ui):
 def test_malformed_booking_response(ui):
     page, api = ui
     page.locator('#model-menu-services button').first.click()
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_be_visible()
     api.failures['booking-create'] = 'malformed'
+    open_available_slot(page, last=False)
     page.locator('#model-search-results button').click()
     popup(page, 'Не удалось отправить заявку')
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_be_enabled()
 
 
@@ -568,7 +589,9 @@ def test_http_preview_full_flow(ui, request):
     assert len({s['slot_id'] for s in api.slots}) == 2
     page.evaluate("window.switchRole('model')")
     page.locator('#model-menu-services button').first.click()
+    open_available_slot(page, last=False)
     expect(page.locator('#model-search-results button')).to_have_count(2)
+    open_available_slot(page, last=True)
     page.locator('#model-search-results button').last.click()
     expect(page.locator('#screen-model-success')).to_be_visible()
     expect(page.locator('#succ-val-address')).to_have_text('Второй адрес')
@@ -584,6 +607,7 @@ def test_http_preview_full_flow(ui, request):
     page.locator('#screen-model-records [data-mode=archive]').click()
     expect(page.locator('#model-records-list')).to_contain_text('Отменена моделью')
     navigate(page, 'screen-model-search')
+    open_available_slot(page, last=True)
     page.locator('#model-search-results button').last.click()
     expect(page.locator('#screen-model-success')).to_be_visible()
     assert len({b['booking_id'] for b in api.bookings}) == 2
@@ -722,10 +746,10 @@ def test_master_profile_reference_layout(ui, width):
         assert button.evaluate('(b)=>b.scrollWidth <= b.clientWidth')
         assert button.locator('svg').bounding_box()['y'] < button.locator('span').bounding_box()['y']
     if width == 390:
-        assert actions.first.bounding_box()['y'] == 380
-        assert profile.locator('.master-address-field').bounding_box()['y'] == 504
-        assert profile.locator('.btn-outline').bounding_box()['y'] == 617
-        assert profile.locator('.support-button').bounding_box()['y'] == 666
+        assert actions.first.bounding_box()['height'] == 76
+        assert profile.locator('.master-address-field').bounding_box()['width'] == 350
+        assert profile.locator('.btn-outline').bounding_box()['height'] == 36
+        assert profile.locator('.support-button').evaluate('(e)=>getComputedStyle(e).backgroundColor') == 'rgb(28, 28, 29)'
         page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/reference-master-profile-390.png'))
     address = page.get_by_label('Адрес предоставления услуг', exact=True)
     address.fill('Локальный адрес мастера')
@@ -743,3 +767,160 @@ def test_master_profile_reference_layout(ui, width):
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     profile.get_by_role('button', name='Стать моделью', exact=True).click()
     expect(page.locator('#screen-model-menu')).to_be_visible()
+
+
+@pytest.mark.parametrize('width', [320, 390, 430])
+def test_master_polished_surfaces(ui, width):
+    page, api = ui
+    page.set_viewport_size({'width': width, 'height': 844})
+    api.pending()
+    master(page)
+    for suffix in ('menu', 'records', 'profile'):
+        navigate(page, f'screen-master-{suffix}')
+        page.wait_for_timeout(350)
+        screen = page.locator('.screen.active')
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        for button in screen.locator('button').all():
+            assert button.evaluate('(b)=>b.scrollWidth <= b.clientWidth')
+        if suffix != 'profile':
+            card = screen.locator('.master-record-card').first
+            expect(card).to_be_visible()
+            expect(card.locator('.record-detail svg')).to_have_count(3)
+            assert card.locator('.service-status').evaluate('(e)=>getComputedStyle(e).borderRadius') == '8px'
+            assert card.evaluate('''c => [...c.querySelectorAll('button, .details-text, .service-status')].every(e => {
+                const r = e.getBoundingClientRect(), b = c.getBoundingClientRect();
+                return r.left >= b.left && r.right <= b.right && r.bottom <= b.bottom;
+            })''')
+            if suffix == 'menu':
+                assert screen.locator('.master-create-slot').bounding_box()['height'] == 78
+            else:
+                tabs = screen.locator('.tab-full')
+                assert tabs.nth(0).bounding_box()['width'] == tabs.nth(1).bounding_box()['width'] == width / 2
+                for label in ('Архив', 'Активные'):
+                    tabs.filter(has_text=label).click()
+                    expect(screen.locator('.tab-full.active')).to_have_text(label)
+                    assert screen.locator('.tab-full.active').evaluate('(e)=>getComputedStyle(e).borderColor') == 'rgba(255, 255, 255, 0.06)'
+        if width == 390:
+            page.screenshot(path=str(ROOT / f'tests/bb75/artifacts/polished-master-{suffix}-390.png'))
+
+
+@pytest.mark.parametrize('width', [320, 390, 430])
+def test_available_slot_disclosure(ui, width):
+    import copy
+    page, api = ui
+    page.set_viewport_size({'width': width, 'height': 844})
+    api.slots[0]['description'] = 'Комментарий ' * 30 if width == 320 else 'Только mock'
+    api.slots.append({**copy.deepcopy(api.slots[0]), 'slot_id': 12, 'city': None, 'address': None, 'description': None})
+    page.locator('#model-menu-services button').first.click()
+    cards = page.locator('.available-slot-card')
+    expect(cards).to_have_count(2)
+    summary = cards.first.locator('summary')
+    expect(summary).to_have_attribute('aria-expanded', 'false')
+    expect(cards.first.get_by_role('button', name='Записаться')).not_to_be_visible()
+    expect(cards.first.locator('summary')).to_contain_text('Москва')
+    expect(cards.last.locator('summary .record-detail')).to_have_count(0)
+    summary.focus()
+    page.keyboard.press('Enter')
+    expect(summary).to_have_attribute('aria-expanded', 'true')
+    expect(cards.first.locator('.slot-expanded-content')).to_contain_text('60 мин')
+    expect(cards.first.locator('.slot-expanded-content')).to_contain_text(api.slots[0]['description'])
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.keyboard.press('Space')
+    expect(summary).to_have_attribute('aria-expanded', 'false')
+    assert not any(e == 'booking-create' for e, b in api.calls)
+    if width == 390:
+        summary.evaluate('(e)=>e.blur()')
+        page.wait_for_timeout(350)
+        page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/glass-model-search-collapsed-390.png'))
+    summary.click()
+    expect(summary).to_have_attribute('aria-expanded', 'true')
+    if width == 390:
+        summary.evaluate('(e)=>e.blur()')
+        page.wait_for_timeout(350)
+        page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/glass-model-search-expanded-390.png'))
+    button = cards.first.get_by_role('button', name='Записаться')
+    api.hold = 'booking-create'
+    button.evaluate('(b)=>{b.click();b.click()}')
+    expect(button).to_be_disabled()
+    expect(summary).to_have_attribute('aria-expanded', 'true')
+    assert len(api.held) == 1
+
+
+def test_russian_slot_counts(ui):
+    page, api = ui
+    result = page.evaluate('''async () => {
+        const {formatAvailableSlots} = await import('/js/format.js');
+        return [0,1,2,5,21,22,11,12,14,111,114,121].map(formatAvailableSlots);
+    }''')
+    assert result == ['Нет свободных слотов', '1 свободный слот', '2 свободных слота',
+                      '5 свободных слотов', '21 свободный слот', '22 свободных слота',
+                      '11 свободных слотов', '12 свободных слотов', '14 свободных слотов',
+                      '111 свободных слотов', '114 свободных слотов', '121 свободный слот']
+
+
+def test_blue_material_empty_state_and_focus(ui):
+    page, api = ui
+    master(page)
+    empty = page.locator('#master-empty-state')
+    expect(empty.locator('svg')).to_have_count(1)
+    expect(empty).to_contain_text('нет активных заявок')
+    page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/glass-master-empty-390.png'), animations='disabled')
+    create = page.locator('.master-create-slot')
+    assert create.bounding_box()['height'] == 78
+    assert 'linear-gradient' in create.evaluate('(e)=>getComputedStyle(e).backgroundImage')
+    navigate(page, 'screen-master-profile')
+    actions = page.locator('#screen-master-profile .profile-action-btn')
+    for button in actions.all():
+        assert button.bounding_box()['height'] == 76
+        assert button.evaluate('(e)=>getComputedStyle(e).fontSize') == '19px'
+        assert button.locator('svg').bounding_box()['width'] == 26
+        assert 'linear-gradient' in button.evaluate('(e)=>getComputedStyle(e).backgroundImage')
+    page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/glass-master-profile-390.png'), animations='disabled')
+    nav = page.locator('#bottom-navigation button').first
+    nav.click()
+    assert nav.evaluate("e=>e.matches(':focus-visible')") is False
+    nav.focus()
+    page.keyboard.press('Tab')
+    focused = page.locator('#bottom-navigation button:focus-visible')
+    expect(focused).to_have_count(1)
+    assert focused.evaluate('(e)=>getComputedStyle(e).outlineStyle') != 'none'
+
+
+@pytest.mark.parametrize('width', [320, 390, 430])
+@pytest.mark.parametrize('reason,label', [('time', 'Не подходит время'), ('other', 'Другая причина')])
+def test_booking_cancel_dialog_layout_and_actions(ui, width, reason, label):
+    page, api = ui
+    api.pending()
+    page.set_viewport_size({'width': width, 'height': 568})
+    navigate(page, 'screen-model-records')
+    page.get_by_role('button', name='Отменить', exact=True).click()
+    dialog = page.locator('.cancel-booking-modal')
+    expect(dialog).to_be_visible()
+    page.wait_for_timeout(350)
+    buttons = dialog.locator('button')
+    boxes = [b.bounding_box() for b in buttons.all()]
+    assert len(boxes) == 3
+    assert boxes[0]['width'] == boxes[1]['width']
+    assert boxes[0]['y'] + boxes[0]['height'] < boxes[1]['y']
+    assert boxes[1]['y'] + boxes[1]['height'] < boxes[2]['y']
+    assert dialog.locator('.modal-box').bounding_box()['height'] < 280
+    for button in buttons.all():
+        assert button.evaluate('(b)=>b.scrollWidth <= b.clientWidth && b.scrollHeight <= b.clientHeight')
+        assert button.bounding_box()['height'] == 44
+    box = dialog.locator('.modal-box').bounding_box()
+    assert box['x'] >= 0 and box['x'] + box['width'] <= width
+    if width == 390 and reason == 'time':
+        page.screenshot(path=str(ROOT / 'tests/bb75/artifacts/booking-cancel-dialog-390.png'))
+    dialog.get_by_role('button', name='Назад', exact=True).click()
+    expect(dialog).not_to_be_visible()
+    assert api.bookings[0]['status'] == 'Ожидает подтверждения мастера'
+    assert not any(e == 'bookings-write' for e, b in api.calls)
+    page.get_by_role('button', name='Отменить', exact=True).click()
+    dialog = page.locator('.cancel-booking-modal.active')
+    expect(dialog).to_be_visible()
+    expect(dialog.locator('input, textarea')).to_have_count(0)
+    dialog.get_by_role('button', name=label, exact=True).click()
+    popup(page, 'отмен')
+    assert api.bookings[0]['status'] == 'Отменена моделью'
+    assert api.bookings[0]['reason'] == reason
+    assert sum(e == 'bookings-write' for e, b in api.calls) == 1

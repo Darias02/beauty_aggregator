@@ -1,3 +1,4 @@
+import { formatAvailableSlots } from '../format.js';
 import {
     setSelectedService
 } from '../state.js';
@@ -39,12 +40,7 @@ export function createServiceCard({
         '';
 
 
-    const countText =
-        availableCount === 0
-            ? 'Нет свободных слотов'
-            : availableCount === 1
-                ? '1 свободный слот'
-                : `${availableCount} свободных слотов`;
+    const countText = formatAvailableSlots(availableCount);
 
 
     card.innerHTML = `
@@ -82,7 +78,7 @@ export function createServiceCard({
 
         </div>
 
-        <div class="service-status">
+        <div class="service-status slot-count">
             ${escapeHtml(countText)}
         </div>
 

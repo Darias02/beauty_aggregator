@@ -1,3 +1,4 @@
+import { outlineIcon } from '../../components/icons.js';
 import {
     getServices,
     getAvailableCities
@@ -335,172 +336,46 @@ export async function renderSearchResults() {
 }
 
 
-function createSlotCard(
-    slot,
-    service
-) {
-    const card =
-        document.createElement('div');
-
-
-    card.className =
-        'service-card';
-
-
-    const {
-        date,
-        time
-    } =
-        formatDateTime(
-            slot.date_time
-        );
-
-
+function createSlotCard(slot, service) {
+    const card = document.createElement('details');
+    card.className = 'service-card available-slot-card';
+    const { date, time } = formatDateTime(slot.date_time);
+    const row = (kind, text) => text
+        ? `<div class="details-text record-detail">${outlineIcon(kind)}<span>${escapeHtml(text)}</span></div>`
+        : '';
     card.innerHTML = `
-        <div class="service-header">
-
-            <div class="service-left">
-
-                <div
-                    class="service-icon"
-                    ${
-                        service?.icon_url
-                            ? `style="
-                                background-image:url('${escapeHtml(
-                                    service.icon_url
-                                )}');
-                                background-size:cover;
-                                background-position:center;
-                            "`
-                            : ''
-                    }
-                >
-                    ${
-                        service?.icon_url
-                            ? ''
-                            : 'BB'
-                    }
-                </div>
-
+        <summary aria-expanded="false">
+            <div class="slot-heading">
                 <div>
-
-                    <div class="service-title">
-                        ${escapeHtml(
-                            service?.name ||
-                            'Услуга'
-                        )}
-                    </div>
-
-                    <div class="service-time">
-                        ${escapeHtml(date)}
-                        ${
-                            time
-                                ? ` · ${escapeHtml(time)}`
-                                : ''
-                        }
-                    </div>
-
+                    <div class="service-title">${escapeHtml(service?.name || 'Услуга')}</div>
+                    <div class="service-time">${escapeHtml(date)}${time ? ` · ${escapeHtml(time)}` : ''}</div>
                 </div>
-
+                <svg class="slot-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
             </div>
-
+            ${row('city', slot.city)}
+            ${row('address', slot.address)}
+        </summary>
+        <div class="slot-expanded-content">
+            ${row('description', slot.description)}
+            ${row('description', service?.duration)}
+            <button class="btn btn-primary slot-book-button" type="button">Записаться</button>
         </div>
-
-        <div class="service-status">
-            ${
-                slot.city
-                    ? escapeHtml(slot.city)
-                    : ''
-            }
-        </div>
-
-        ${
-            slot.address
-                ? `
-                    <div class="details-text">
-                        Адрес:
-                        ${escapeHtml(
-                            slot.address
-                        )}
-                    </div>
-                `
-                : ''
-        }
-
-        ${
-            slot.description
-                ? `
-                    <div class="details-text">
-                        ${escapeHtml(
-                            slot.description
-                        )}
-                    </div>
-                `
-                : ''
-        }
-
-        <div
-            class="service-details"
-        >
-            <div
-                class="details-text"
-            >
-                Свободный слот
-            </div>
-        </div>
-
-        <button
-            class="btn btn-primary"
-            type="button"
-        >
-            Записаться
-        </button>
     `;
-
-
-    const button =
-        card.querySelector(
-            'button'
-        );
-
-
-    button.addEventListener(
-        'click',
-        async (event) => {
-            event.stopPropagation();
-
-            if (button.disabled) return;
-            button.disabled = true;
-            try {
-                await bookSlot(slot);
-            } finally {
-                button.disabled = false;
-            }
+    const summary = card.querySelector('summary');
+    card.addEventListener('toggle', () => {
+        summary.setAttribute('aria-expanded', String(card.open));
+    });
+    const button = card.querySelector('button');
+    button.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        if (button.disabled) return;
+        button.disabled = true;
+        try {
+            await bookSlot(slot);
+        } finally {
+            button.disabled = false;
         }
-    );
-
-
-    card.addEventListener(
-        'click',
-        (event) => {
-            if (
-                event.target.closest(
-                    'button'
-                )
-            ) {
-                return;
-            }
-
-            card
-                .querySelector(
-                    '.service-details'
-                )
-                ?.classList
-                .toggle('expanded');
-        }
-    );
-
-
+    });
     return card;
 }
 

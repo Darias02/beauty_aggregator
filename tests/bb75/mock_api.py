@@ -39,7 +39,7 @@ class MockAPI:
         if endpoint == 'catalog':
             return {action: {'services': self.services,
                              'counts': {str(service['service_id']): sum(s['status'] == 'Свободен' and s['service_id'] == service['service_id'] for s in self.slots) for service in self.services},
-                             'cities': sorted({s['city'] for s in self.slots if s['status'] == 'Свободен'})}[action]}
+                             'cities': sorted({s['city'] for s in self.slots if s['status'] == 'Свободен' and s.get('city')})}[action]}
         if endpoint in ('user-profile', 'master-profile', 'master-avatar'):
             profile = self.user if endpoint == 'user-profile' else self.master
             profile.update(body.get('profile', {}))

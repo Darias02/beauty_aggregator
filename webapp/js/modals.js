@@ -92,7 +92,7 @@ export function openConfirmModal({
 }
 
 export function openCancelBookingModal(onSelectReason) {
-    return openChoiceModal({
+    const modal = openChoiceModal({
         title: 'Отменить запись?',
         message: 'Укажите причину отмены.',
         choices: [
@@ -101,6 +101,8 @@ export function openCancelBookingModal(onSelectReason) {
         ],
         onSelect: onSelectReason
     });
+    activeModal.classList.add('cancel-booking-modal');
+    return modal;
 }
 
 export function openRejectBookingModal(onSelectReason) {

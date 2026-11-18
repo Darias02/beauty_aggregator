@@ -1,3 +1,4 @@
+import { outlineIcon } from './icons.js';
 import { hapticImpact } from '../telegram.js';
 
 function escapeHtml(value) {
@@ -38,6 +39,14 @@ function getServiceName(record) {
     return slot?.services?.name || record?.services?.name || 'Услуга';
 }
 
+
+function renderDetail(kind, text, role) {
+    if (!text) return '';
+    const content = escapeHtml(text);
+    if (role !== 'master') return `<div class="details-text">${content}</div>`;
+    return `<div class="details-text record-detail">${outlineIcon(kind)}<span>${content}</span></div>`;
+}
+
 export function createRecordCard({
     record,
     role,
@@ -48,7 +57,7 @@ export function createRecordCard({
     onContact = null
 }) {
     const card = document.createElement('div');
-    card.className = 'service-card record-card';
+    card.className = `service-card record-card${role === 'master' ? ' master-record-card' : ''}`;
 
     const slot = getSlot(record);
     const { date, time } = formatDateTime(slot?.date_time);
@@ -64,11 +73,11 @@ export function createRecordCard({
             </div>
         </div>
 
-        <div class="service-status">статус: ${escapeHtml(status)}</div>
+        <div class="service-status">${role === 'master' ? escapeHtml(status) : `статус: ${escapeHtml(status)}`}</div>
 
-        ${slot?.city ? `<div class="details-text">Город: ${escapeHtml(slot.city)}</div>` : ''}
-        ${slot?.address ? `<div class="details-text">Адрес: ${escapeHtml(slot.address)}</div>` : ''}
-        ${slot?.description ? `<div class="details-text">${escapeHtml(slot.description)}</div>` : ''}
+        ${renderDetail('city', slot?.city ? `Город: ${slot.city}` : '', role)}
+        ${renderDetail('address', slot?.address ? `Адрес: ${slot.address}` : '', role)}
+        ${renderDetail('description', slot?.description, role)}
 
         <div class="btn-action-group"></div>
     `;
