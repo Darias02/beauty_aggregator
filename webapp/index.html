@@ -459,53 +459,18 @@
 
     <div id="screen-master-add" class="screen">
 
-        <div
-            class="header"
-            style="
-                justify-content:flex-start;
-                gap:20px;
-            "
-        >
-
-            <div
-                style="cursor:pointer;"
-                onclick="
-                    window.navigate('screen-master-menu')
-                "
-            >
-                Назад
-            </div>
-
-            <div
-                class="page-title"
-                style="margin:0;"
-            >
-                Добавление слота
-            </div>
-
+        <div class="header slot-form-header">
+            <button class="slot-back" type="button" onclick="window.navigate('screen-master-menu')" aria-label="Назад">‹ Назад</button>
+            <h1 class="page-title">Добавление слота</h1>
         </div>
-
-        <div
-            class="input-box"
-            onclick="
-                window.toggleDropdown('service-dropdown')
-            "
-        >
-
-            <span
-                id="selected-service"
-                style="color:#FFF;"
-            >
-                Выберите услугу
-            </span>
-
-            <div
-                class="dropdown-menu"
-                id="service-dropdown"
-            >
-
-                <div class="dropdown-item">Загрузка...</div>
-
+        <div class="slot-service-field">
+            <span class="slot-field-label" id="slot-service-label">Услуга *</span>
+            <div class="input-box" role="button" tabindex="0" aria-labelledby="slot-service-label selected-service"
+                onclick="window.toggleDropdown('service-dropdown')"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.toggleDropdown('service-dropdown')}">
+                <span id="selected-service">Выберите услугу</span>
+                <span class="service-caret" aria-hidden="true">⌄</span>
+                <div class="dropdown-menu" id="service-dropdown"><div class="dropdown-item">Загрузка...</div></div>
             </div>
         </div>
 
@@ -538,14 +503,16 @@
 
         <label class="slot-description">
 
-            <span>Описание:</span>
+            <span>Описание</span>
 
             <textarea
                 id="slot-description-input"
-                placeholder="Добавьте описание слота"
+                maxlength="2000" rows="4" placeholder="Расскажите об условиях и деталях процедуры..."
             ></textarea>
 
         </label>
+
+        <section id="slot-photo-picker" class="slot-photo-picker" aria-label="Фотографии работ"></section>
 
         <div
             class="page-title"
@@ -559,7 +526,7 @@
 
         <label class="slot-address">
 
-            <span>Время:</span>
+            <span>Время</span>
 
             <input
                 id="slot-time-input"
@@ -586,6 +553,7 @@
 
         </div>
 
+        <button id="slot-photos-finish" class="btn photo-finish" type="button" hidden>Продолжить с сохранёнными фото</button>
         <button
             style="
                 border-radius:27px;

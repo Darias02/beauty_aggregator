@@ -1,3 +1,4 @@
+import { attachSlotPhotos } from '../../components/slot-photos.js';
 import { outlineIcon } from '../../components/icons.js';
 import {
     getServices,
@@ -361,11 +362,12 @@ function createSlotCard(slot, service) {
             <button class="btn btn-primary slot-book-button" type="button">Записаться</button>
         </div>
     `;
+    attachSlotPhotos(card.querySelector('summary'), slot.slot_id, { compact: true });
     const summary = card.querySelector('summary');
     card.addEventListener('toggle', () => {
         summary.setAttribute('aria-expanded', String(card.open));
     });
-    const button = card.querySelector('button');
+    const button = card.querySelector('.slot-book-button');
     button.addEventListener('click', async (event) => {
         event.stopPropagation();
         if (button.disabled) return;

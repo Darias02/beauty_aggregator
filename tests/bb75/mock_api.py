@@ -39,6 +39,8 @@ class MockAPI:
         if endpoint == 'address-suggest':
             # Offline preview never queries DaData; manual entry stays available.
             return {'suggestions': []}
+        if endpoint == 'slot-photos':
+            return {'photos': []}
         if endpoint == 'catalog':
             return {action: {'services': self.services,
                              'counts': {str(service['service_id']): sum(s['status'] == 'Свободен' and s['service_id'] == service['service_id'] for s in self.slots) for service in self.services},

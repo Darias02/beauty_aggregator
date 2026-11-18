@@ -47,3 +47,7 @@ verify_jwt = false
 # Signed Telegram init_data is verified by the handler before contacting DaData.
 [functions.address-suggest]
 verify_jwt = false
+
+[functions.slot-photos]
+verify_jwt = false
+static_files = ["./functions/master-avatar/vendor/magick.wasm"]

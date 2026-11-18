@@ -1,3 +1,4 @@
+import { attachSlotPhotos } from './slot-photos.js';
 import { outlineIcon } from './icons.js';
 import { hapticImpact } from '../telegram.js';
 
@@ -82,6 +83,7 @@ export function createRecordCard({
         <div class="btn-action-group"></div>
     `;
 
+    if (slot?.slot_id) attachSlotPhotos(card, slot.slot_id, { manage: role === 'master' });
     const actionGroup = card.querySelector('.btn-action-group');
 
     if (role === 'model') {

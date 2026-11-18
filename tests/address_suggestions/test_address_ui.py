@@ -67,7 +67,7 @@ def ui(server, tmp_path, request):
                 request.config.getoption('--address-artifact') and u.netloc == 'bxzwfidujuejmrbqjmgo.supabase.co')
             if allowed_api and u.path.startswith('/functions/v1/'):
                 endpoint = u.path.rsplit('/', 1)[-1]
-                body = r.request.post_data_json
+                body = r.request.post_data_json if 'application/json' in r.request.headers.get('content-type', '') else {}
                 if endpoint == 'address-suggest':
                     api.calls.append((endpoint, body))
                     if api.suggestion_failure == 'network':

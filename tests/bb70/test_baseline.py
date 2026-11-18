@@ -16,7 +16,7 @@ from tests.bb63.test_slots_write import BIN, cluster  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[2]
 MIGRATIONS = sorted((ROOT / "supabase/migrations").glob("*.sql"))
-TABLES = ("users", "masters", "services", "slots", "bookings", "telegram_webhook_updates")
+TABLES = ("users", "masters", "services", "slots", "bookings", "telegram_webhook_updates", "slot_photos")
 
 
 @pytest.fixture(params=[False, True], ids=["plain-acl", "supabase-like-default-acl"])
@@ -75,7 +75,7 @@ def test_cli_names_and_order():
         "bb03_lock_master_avatar_writes.sql", "telegram_webhook_updates.sql",
         "bb24_atomic_booking.sql", "bb63_slots_write.sql", "bb64_slot_cancel.sql",
         "bb66_booking_decisions.sql", "bb67_model_cancel.sql", "bb73_preserve_booking_history.sql",
-        "bb73_preserve_parent_history.sql",
+        "bb73_preserve_parent_history.sql", "slot_work_photos.sql",
     ]
 
 
@@ -91,14 +91,14 @@ def test_empty_schema_metadata_and_acl(database):
             assert db(f"select has_table_privilege('{role}','public.{table}','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') or has_any_column_privilege('{role}','public.{table}','SELECT,INSERT,UPDATE,REFERENCES')") == "f"
             for statement in (f"select * from {table}", f"insert into {table} default values", f"delete from {table}"):
                 assert "42501" in db(f"set role {role}; {statement}", success=False)
-    assert db("select count(*) from pg_constraint where connamespace='public'::regnamespace and contype='p'") == "6"
-    assert db("select string_agg(conname || ':' || confdeltype::text, ',' order by conname) from pg_constraint where connamespace='public'::regnamespace and contype='f'") == "bookings_slot_id_fkey:r,bookings_user_id_fkey:r,slots_master_id_fkey:r,slots_service_id_fkey:r"
+    assert db("select count(*) from pg_constraint where connamespace='public'::regnamespace and contype='p'") == "7"
+    assert db("select string_agg(conname || ':' || confdeltype::text, ',' order by conname) from pg_constraint where connamespace='public'::regnamespace and contype='f'") == "bookings_slot_id_fkey:r,bookings_user_id_fkey:r,slot_photos_slot_id_fkey:n,slots_master_id_fkey:r,slots_service_id_fkey:r"
     assert db("select count(*) from pg_policy where polrelid in (select oid from pg_class where relnamespace='public'::regnamespace)") == "0"
     columns = json.loads(db("""
         select json_object_agg(table_name || '.' || column_name,
             json_build_array(data_type, is_nullable, identity_generation, column_default))
         from information_schema.columns where table_schema='public'
-        and table_name <> 'telegram_webhook_updates'
+        and table_name not in ('telegram_webhook_updates','slot_photos')
     """))
     expected_columns = {
         "users": "user_id name phone_number",
@@ -124,7 +124,7 @@ def test_empty_schema_metadata_and_acl(database):
         assert db(f"select indisvalid from pg_index where indexrelid='public.{index}'::regclass") == "t"
     for index in ("bookings_one_live_booking_per_slot", "slots_one_live_time_per_master"):
         assert db(f"select indisunique and indpred is not null from pg_index where indexrelid='public.{index}'::regclass") == "t"
-    assert db("select count(*) from pg_proc where pronamespace='public'::regnamespace") == "10"
+    assert db("select count(*) from pg_proc where pronamespace='public'::regnamespace") == "14"
     assert db("select bool_and(not prosecdef and has_function_privilege('service_role',oid,'EXECUTE') and not has_function_privilege('anon',oid,'EXECUTE') and not has_function_privilege('authenticated',oid,'EXECUTE')) from pg_proc where pronamespace='public'::regnamespace") == "t"
 
 

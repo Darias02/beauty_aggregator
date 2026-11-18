@@ -1,3 +1,4 @@
+import { createSlotPhotoPicker } from '../../components/slot-photo-picker.js';
 import { attachAddressAutocomplete } from '../../components/address-autocomplete.js';
 
 import {
@@ -32,6 +33,7 @@ import {
 
 let initialized = false;
 let publishing = false;
+let photoPicker;
 
 let services = [];
 
@@ -314,13 +316,27 @@ function clearForm() {
     }
 
 
+    document.getElementById('screen-master-add').classList.remove('slot-form-saved');
+    photoPicker?.reset();
+    document.querySelectorAll('#screen-master-add input, #screen-master-add textarea').forEach((input) => { input.disabled = false; });
+    document.querySelector('#screen-master-add .publish-slot-button').textContent = 'Опубликовать слот';
+    document.getElementById('slot-photos-finish').hidden = true;
     resetSlotCreation();
     document.dispatchEvent(new Event('bb:slot-form-reset'));
 }
 
 
 export async function createMasterSlot() {
-    if (publishing) return;
+    if (publishing || photoPicker?.busy) return;
+    if (photoPicker?.slotId) {
+        publishing = true;
+        const button = document.querySelector('#screen-master-add .publish-slot-button');
+        button.disabled = true;
+        try { await photoPicker.upload(photoPicker.slotId); clearForm(); navigate('screen-master-success'); }
+        catch { /* Picker displays partial-success status and retry action. */ }
+        finally { publishing = false; button.disabled = false; }
+        return;
+    }
     const masterId =
         getTelegramUserId();
 
@@ -413,7 +429,7 @@ export async function createMasterSlot() {
         hapticImpact('medium');
 
 
-        await createSlot({
+        const createdSlot = await createSlot({
             masterId,
             serviceId:
                 service.service_id,
@@ -425,6 +441,14 @@ export async function createMasterSlot() {
         });
 
 
+        try { await photoPicker.upload(createdSlot.slot_id); }
+        catch {
+            document.getElementById('screen-master-add').classList.add('slot-form-saved');
+            button.textContent = 'Повторить загрузку фото';
+            document.getElementById('slot-photos-finish').hidden = false;
+            document.querySelectorAll('#screen-master-add input, #screen-master-add textarea').forEach((input) => { input.disabled = true; });
+            return;
+        }
         clearForm();
 
 
@@ -455,6 +479,8 @@ export function initMasterAddSlot() {
     }
 
     initialized = true;
+    photoPicker = createSlotPhotoPicker(document.getElementById('slot-photo-picker'));
+    document.getElementById('slot-photos-finish').onclick = () => { clearForm(); navigate('screen-master-success'); };
 
     const cityInput = document.getElementById('slot-city-input');
     const addressInput = document.getElementById('slot-address-input');
